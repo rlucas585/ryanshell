@@ -1,33 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   exit.c                                             :+:    :+:            */
+/*   vector_free.c                                      :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2020/04/16 11:54:12 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 20:01:53 by rlucas        ########   odam.nl         */
+/*   Created: 2020/05/29 18:48:02 by rlucas        #+#    #+#                 */
+/*   Updated: 2020/05/29 18:48:13 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <minishell.h>
-#include <unistd.h>
 #include <libft.h>
 
-/*
-** Functions to free up everything before exiting the program.
-*/
-
-void		error_exit(t_msh *prog, int err)
+void		vector_free(t_vector *v)
 {
-	ft_printf_fd(2, "Error %d - ", err);
-	ft_printf_fd(2, error_lookup(err));
-	free(prog->line.cap_table);
-	exit(err);
+	free(v->items);
 }
 
-void		std_exit(t_msh *prog)
-{
-	free(prog->line.cap_table);
-	exit(0);
-}

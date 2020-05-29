@@ -6,7 +6,7 @@
 #    By: rlucas <marvin@codam.nl>                     +#+                      #
 #                                                    +#+                       #
 #    Created: 2020/04/12 11:11:07 by rlucas        #+#    #+#                  #
-#    Updated: 2020/05/28 10:17:01 by rlucas        ########   odam.nl          #
+#    Updated: 2020/05/29 18:40:43 by rlucas        ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,25 +26,19 @@ SRC =	main.c \
 		delete_char.c \
 		move_cursor.c \
 		move_cursor2.c \
-		execute.c \
-		builtin.c \
-		tok.c \
-		pipeline.c \
-		vector.c \
 		tables.c \
-		commands.c \
 		env.c \
 		prompt.c \
 		terminal.c \
 		ryantokens.c \
 		finitestatemachine.c \
-		r_execute.c \
 		format_toks.c \
 		inputconcat.c \
 		lexutils.c \
 		sum_tokens.c \
 		gen_tokens.c \
-		utils.c
+		utils.c \
+		r_execute.c
 
 OBJ := $(addprefix $(OBJDIR), $(SRC:%.c=%.o))
 SRC := $(addprefix $(SRCDIR), $(SRC))

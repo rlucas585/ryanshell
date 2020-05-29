@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/10/28 15:16:43 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/04 13:27:46 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/29 20:13:22 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <libft_types.h>
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 32
@@ -24,19 +25,6 @@
 # define INVALID_FD_OR_MALLOC_FAIL -1
 # define END_OF_FILE 0
 # define SUCCESSFUL_READ 1
-
-typedef struct		s_list
-{
-	void			*content;
-	struct s_list	*next;
-}					t_list;
-
-typedef struct		s_gnlopts
-{
-	int				ret;
-	int				more;
-	char			*buf;
-}					t_gnlopts;
 
 size_t				ft_strlen(const char *string);
 int					ft_isupper(int c);
@@ -101,5 +89,19 @@ char				*ft_strtok(char *str, const char *delim);
 int					ft_strcmp(const char *s1, const char *s2);
 int					ft_putchar(int c);
 int					ft_is_whitespace(int c);
+void				*ft_realloc(void *ptr, size_t newsize);
+
+/*
+** Vector Functions
+*/
+
+void				vector_map(t_vector *v, void (*f)(void *));
+int					vector_add(t_vector *v, void *item);
+int					vector_delete(t_vector *v, size_t index);
+void				vector_free(t_vector *v);
+int					vector_init(t_vector *v);
+void				vector_set(t_vector *v, int index, void *item);
+void				*vector_get(t_vector *v, int index);
+size_t				vector_total(t_vector *v);
 
 #endif

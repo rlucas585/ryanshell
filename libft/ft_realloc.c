@@ -1,33 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   exit.c                                             :+:    :+:            */
+/*   ft_realloc.c                                       :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2020/04/16 11:54:12 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 20:01:53 by rlucas        ########   odam.nl         */
+/*   Created: 2020/05/29 18:41:57 by rlucas        #+#    #+#                 */
+/*   Updated: 2020/05/29 18:42:12 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <minishell.h>
-#include <unistd.h>
 #include <libft.h>
 
 /*
-** Functions to free up everything before exiting the program.
+** ft_realloc() creates a new allocated region of memory, copies the 
+** contents from the previous memory, then frees the previous memory.
 */
 
-void		error_exit(t_msh *prog, int err)
+void	*ft_realloc(void *ptr, size_t newsize)
 {
-	ft_printf_fd(2, "Error %d - ", err);
-	ft_printf_fd(2, error_lookup(err));
-	free(prog->line.cap_table);
-	exit(err);
-}
+	char	*new;
 
-void		std_exit(t_msh *prog)
-{
-	free(prog->line.cap_table);
-	exit(0);
+	new = (char *)ft_calloc(1, newsize);
+	if (!new)
+	{
+		free(ptr);
+		return (NULL);
+	}
+	if (!ptr)
+		return (new);
+	ft_memcpy(new, ptr, newsize);
+	free(ptr);
+	return (new);
 }

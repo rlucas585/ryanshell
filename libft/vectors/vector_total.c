@@ -1,33 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   exit.c                                             :+:    :+:            */
+/*   vector_total.c                                     :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2020/04/16 11:54:12 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 20:01:53 by rlucas        ########   odam.nl         */
+/*   Created: 2020/05/29 18:46:12 by rlucas        #+#    #+#                 */
+/*   Updated: 2020/05/29 20:09:29 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <minishell.h>
-#include <unistd.h>
-#include <libft.h>
+#include <libft_types.h>
 
 /*
-** Functions to free up everything before exiting the program.
+** Return 1 on error. 0 on success.
 */
 
-void		error_exit(t_msh *prog, int err)
+size_t	vector_total(t_vector *v)
 {
-	ft_printf_fd(2, "Error %d - ", err);
-	ft_printf_fd(2, error_lookup(err));
-	free(prog->line.cap_table);
-	exit(err);
-}
-
-void		std_exit(t_msh *prog)
-{
-	free(prog->line.cap_table);
-	exit(0);
+	return (v->total);
 }

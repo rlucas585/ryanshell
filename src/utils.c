@@ -6,33 +6,13 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/29 16:46:14 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/26 16:58:49 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/29 18:17:24 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include <libft.h>
 #include <minishell.h>
-
-/*
-** ft_realloc() creates a new string, copies the contents from a previous
-** string, the frees the previous string.
-*/
-
-char	*ft_realloc(char *str, size_t newsize)
-{
-	char	*new;
-
-	new = (char *)ft_calloc(1, newsize);
-	if (!new)
-	{
-		free(str);
-		return (NULL);
-	}
-	ft_memcpy(new, str, newsize);
-	free(str);
-	return (new);
-}
 
 /*
 ** Used to report Env output and to create the prompt.

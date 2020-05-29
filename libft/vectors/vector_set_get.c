@@ -1,33 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   exit.c                                             :+:    :+:            */
+/*   vector_set_get.c                                   :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2020/04/16 11:54:12 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 20:01:53 by rlucas        ########   odam.nl         */
+/*   Created: 2020/05/29 18:48:38 by rlucas        #+#    #+#                 */
+/*   Updated: 2020/05/29 20:12:14 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <minishell.h>
-#include <unistd.h>
-#include <libft.h>
+#include <libft_types.h>
 
-/*
-** Functions to free up everything before exiting the program.
-*/
-
-void		error_exit(t_msh *prog, int err)
+void		vector_set(t_vector *v, size_t index, void *item)
 {
-	ft_printf_fd(2, "Error %d - ", err);
-	ft_printf_fd(2, error_lookup(err));
-	free(prog->line.cap_table);
-	exit(err);
+	if (index < v->total)
+		v->items[index] = item;
 }
 
-void		std_exit(t_msh *prog)
+void		*vector_get(t_vector *v, size_t index)
 {
-	free(prog->line.cap_table);
-	exit(0);
+	if (index < v->total)
+		return (v->items[index]);
+	return (NULL);
 }

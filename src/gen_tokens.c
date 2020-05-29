@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/26 13:10:59 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/28 09:52:04 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/29 20:23:22 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,35 +55,6 @@ void		mash_string(char *line, size_t dest, size_t src)
 	}
 }
 
-char		*env_val_get_n(const char *name, t_var *env, size_t len)
-{
-	t_var		*tmp;
-
-	tmp = env;
-	while (tmp)
-	{
-		if (ft_strncmp(tmp->name, name, len) == 0)
-			return (tmp->val);
-		tmp = tmp->next;
-	}
-	return (NULL);
-}
-
-void		dangerous_print(char *start, size_t len)
-{
-	size_t		i;
-
-	i = 0;
-	while (i <= len)
-	{
-		if (start[i] == '\0')
-			ft_putchar('0');
-		else
-			ft_putchar(start[i]);
-		i++;
-	}
-}
-
 void		insert_into_string(t_ryanlexer *lex, t_msh *prog, char *env_value)
 {
 	size_t		end;
@@ -106,8 +77,8 @@ void		add_env_value(t_ryanlexer *lex, t_msh *prog, size_t env_name_len)
 {
 	char		*env_value;
 
-	env_value = env_val_get_n(prog->line.cmd + lex->i + 1,
-			prog->env, env_name_len);
+	env_value = env_val_get(prog->line.cmd + lex->i + 1,
+			prog, env_name_len);
 	mash_string(prog->line.cmd, lex->i, lex->i + env_name_len + 1);
 	if (!env_value)
 	{

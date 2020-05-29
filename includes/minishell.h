@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/16 10:51:49 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/27 23:36:30 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/29 23:51:22 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@
 # define STDIN 0
 # define STDOUT 1
 # define STDERR 2
+
+# define READ_END 0
+# define WRITE_END 1
 
 # define RIGHT -1
 # define LEFT 1
@@ -42,6 +45,7 @@
 
 # include <unistd.h>
 # include <termios.h>
+# include <libft_types.h>
 
 enum			e_toktype
 {
@@ -49,9 +53,9 @@ enum			e_toktype
 	STANDARD,
 	WRITEFILE,
 	APPENDFILE,
-	SEPARATOR,
 	PIPEDCOMMAND,
-	INPUT_SENDER
+	INPUT_SENDER,
+	READ_COMMAND
 };
 
 enum			e_fsm
@@ -70,26 +74,6 @@ enum			e_fsm
 };
 
 extern char	**g_termbuff;
-
-typedef struct s_vec	t_vec;
-
-struct	s_vec
-{
-	char			*store;
-	size_t			type_size;
-	size_t			capacity;
-	size_t			index;
-};
-
-typedef struct s_var	t_var;
-
-struct	s_var
-{
-	char		*name;
-	char		*val;
-	size_t		len;
-	t_var		*next;
-};
 
 typedef struct s_cmd	t_cmd;
 
@@ -129,10 +113,12 @@ typedef struct	s_ryanlexer
 
 typedef struct	s_ryancmd
 {
-	char		**args;
 	char		*output;
 	char		*input;
 	char		*command;
+	int			append;
+	int			cmd_num;
+	int			fork;
 }				t_ryancmd;
 
 typedef struct	s_lexer
@@ -176,13 +162,8 @@ typedef struct	s_line
 
 typedef	struct	s_msh
 {
-	t_vec		process_arr;
-	t_vec		file_arr;
-	t_vec		argtypes;
-	t_vec		args;
-	t_cmd		*commands;
-	char		**envp;
-	t_var		*env;
+	t_ryantok	*tokens;
+	t_vector	env;
 	t_line		line;
 	size_t		argc;
 }				t_msh;
@@ -191,7 +172,8 @@ enum			e_error
 {
 	MEM_FAIL,
 	TERM_FAIL,
-	CAP_FAIL
+	CAP_FAIL,
+	CMD_NOT_FOUND
 };
 
 enum			e_builtins
@@ -221,14 +203,14 @@ enum			e_tokentypes
 	DEFAULT,
 };
 
-typedef void	(*t_builtin)(t_msh *prog, int argc, char **argv);
 typedef int		(*t_inputf)(t_line *line, char buf[6]);
+typedef void	(*t_rbin)(t_msh *prog, t_ryancmd cmd, int cmd_num);
 
 /*
 ** Utility functions in utils.c
 */
 
-char			*ft_realloc(char *str, size_t newsize);
+void			*ft_realloc(void *ptr, size_t newsize);
 char			*ft_str3join(const char *s1, const char *s2, const char *s3);
 void			print_tokens(t_ryantok *tokens);
 
@@ -236,6 +218,7 @@ void			print_tokens(t_ryantok *tokens);
 ** Add a prompt to the shell, in prompt.c 
 */
 
+size_t			ft_no_ansi_strlen(const char *str);
 char			*prompt(t_msh *prog, t_line *line);
 
 /*
@@ -273,56 +256,39 @@ char			*error_lookup(int err);
 
 typedef void	(*t_escapef)(t_lexer *lex, char *last);
 
-int				execute(t_msh *prog, t_cmd *cmd);
-char			**ft_str2clear(char **str);
-t_cmd			*clear_commands(t_cmd *commands);
-t_cmd			*get_commands(t_vec *args, int *types, t_vec *fd_arr);
-void			print_command(t_cmd *command);
-int				set_redirection(t_cmd *command, char **args,
-								int *types, t_vec *fd_arr);
-
 void			error_exit(t_msh *prog, int err);
 void			std_exit(t_msh *prog);
 
-int				vec_add(t_vec *vector, void *buffer);
-int				vec_new(t_vec *vector, size_t type_size);
-void			vec_destroy(t_vec *vector, void (*del)(void *));
-
-void			tokclear(t_token *list, void (*del)(void *));
-void			tokprint(t_token *list);
-int				tokenize(t_vec *args, t_vec *argtypes, char *raw);
-
-void			close_all(t_vec *fd_arr);
-void			close_iostream(int *iostream);
-void			close_ifnot(t_vec *fd_arr, int *iostream);
-void			print_filearr(t_vec *fd_arr);
-
-void			ft_cd(t_msh *prog, int argc, char **argv);
-void			ft_pwd(t_msh *prog, int argc, char **argv);
-void			ft_env(t_msh *prog, int argc, char **argv);
-void			ft_echo(t_msh *prog, int argc, char **argv);
-void			ft_unset(t_msh *prog, int argc, char **argv);
-void			ft_exit(t_msh *prog, int argc, char **argv);
-void			ft_export(t_msh *prog, int argc, char **argv);
-
-void			env_update(t_msh *prog);
-void			env_unset(t_var **env, char *name);
-t_var			*env_val_set(const char *name, t_var *env, const char *val);
-char			**env_convert(t_var *env);
 void			env_init(t_msh *prog);
-char			*env_val_get(const char *name, t_var *env);
-void			env_clear(t_var *env, void (*del)(void *));
-void			env_print(t_var *env);
+char			*env_val_get(const char *name, t_msh *prog, size_t len);
+void			print_env(t_msh *prog);
 
 /*
 ** New token functions - creates tokens using the same
 ** allocated string from input.
 */
 
-void			tokenizer(t_msh *prog, t_vec *args, t_vec *types);
+void			tokenizer(t_msh *prog);
 size_t			sum_tokens(char *line);
 void			gen_tokens(t_ryantok **tokens, t_msh *prog);
 void			mash_string(char *line, size_t dest, size_t src);
+
+/*
+** New execution based on new tokens.
+*/
+
+int				r_execute(t_msh *prog);
+void			execute_cmd(t_msh *prog, t_ryancmd cmd);
+void			fork_command(t_msh *prog, t_ryancmd cmd);
+void			standard_command(t_msh *prog, t_ryancmd cmd);
+void			print_cmd(t_ryancmd cmd);
+t_ryancmd		format_cmd(t_msh *prog, int cmd_num);
+void			check_pipe(t_msh *prog, t_ryancmd *cmd, int cmd_num);
+void			update_cmd(char *value, int type, t_ryancmd *cmd);
+int				ft_is_builtin(const char *command);
+t_rbin			builtin_funcs(int code);
+void			ft_echo(t_msh *prog, t_ryancmd cmd, int cmd_num);
+int				r_runcmd(t_msh *prog, int cmd_num);
 
 /*
 ** Functions to read input and handle line-editing. In read_input.c,

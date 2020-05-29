@@ -1,33 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   exit.c                                             :+:    :+:            */
+/*   vector_init.c                                      :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2020/04/16 11:54:12 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 20:01:53 by rlucas        ########   odam.nl         */
+/*   Created: 2020/05/29 18:44:45 by rlucas        #+#    #+#                 */
+/*   Updated: 2020/05/29 18:45:06 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <minishell.h>
-#include <unistd.h>
 #include <libft.h>
 
 /*
-** Functions to free up everything before exiting the program.
+** Return 1 on error. 0 on success.
 */
 
-void		error_exit(t_msh *prog, int err)
+int		vector_init(t_vector *v)
 {
-	ft_printf_fd(2, "Error %d - ", err);
-	ft_printf_fd(2, error_lookup(err));
-	free(prog->line.cap_table);
-	exit(err);
-}
-
-void		std_exit(t_msh *prog)
-{
-	free(prog->line.cap_table);
-	exit(0);
+	v->capacity = 4;
+	v->total = 0;
+	v->items = malloc(sizeof(void *) * v->capacity);
+	if (!v->items)
+		return (1);
+	return (0);
 }

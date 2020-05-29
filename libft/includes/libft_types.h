@@ -1,33 +1,38 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   exit.c                                             :+:    :+:            */
+/*   libft_types.h                                      :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2020/04/16 11:54:12 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 20:01:53 by rlucas        ########   odam.nl         */
+/*   Created: 2020/05/29 20:03:02 by rlucas        #+#    #+#                 */
+/*   Updated: 2020/05/29 20:07:27 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <minishell.h>
-#include <unistd.h>
-#include <libft.h>
+#ifndef LIBFT_TYPES_H
+# define LIBFT_TYPES_H
 
-/*
-** Functions to free up everything before exiting the program.
-*/
+# include <stddef.h>
 
-void		error_exit(t_msh *prog, int err)
+typedef struct		s_list
 {
-	ft_printf_fd(2, "Error %d - ", err);
-	ft_printf_fd(2, error_lookup(err));
-	free(prog->line.cap_table);
-	exit(err);
-}
+	void			*content;
+	struct s_list	*next;
+}					t_list;
 
-void		std_exit(t_msh *prog)
+typedef struct		s_gnlopts
 {
-	free(prog->line.cap_table);
-	exit(0);
-}
+	int				ret;
+	int				more;
+	char			*buf;
+}					t_gnlopts;
+
+typedef struct		s_vector
+{
+	void			**items;
+	size_t			capacity;
+	size_t			total;
+}					t_vector;
+
+#endif

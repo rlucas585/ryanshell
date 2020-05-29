@@ -1,33 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   exit.c                                             :+:    :+:            */
+/*   vector_map.c                                       :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2020/04/16 11:54:12 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 20:01:53 by rlucas        ########   odam.nl         */
+/*   Created: 2020/05/29 18:49:06 by rlucas        #+#    #+#                 */
+/*   Updated: 2020/05/29 20:10:19 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <minishell.h>
-#include <unistd.h>
-#include <libft.h>
+#include <libft_types.h>
 
-/*
-** Functions to free up everything before exiting the program.
-*/
-
-void		error_exit(t_msh *prog, int err)
+void		vector_map(t_vector *v, void (*f)(void *))
 {
-	ft_printf_fd(2, "Error %d - ", err);
-	ft_printf_fd(2, error_lookup(err));
-	free(prog->line.cap_table);
-	exit(err);
-}
+	size_t	i;
 
-void		std_exit(t_msh *prog)
-{
-	free(prog->line.cap_table);
-	exit(0);
+	i = 0;
+	while (i < v->total)
+	{
+		f(v->items[i]);
+		i++;
+	}
 }
