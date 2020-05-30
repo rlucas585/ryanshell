@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/16 10:51:49 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 23:51:22 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/30 13:15:43 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,6 +164,7 @@ typedef	struct	s_msh
 {
 	t_ryantok	*tokens;
 	t_vector	env;
+	char		**envp;
 	t_line		line;
 	size_t		argc;
 }				t_msh;
@@ -178,11 +179,11 @@ enum			e_error
 
 enum			e_builtins
 {
-	B_CD,
 	B_ECHO,
+	B_ENV,
+	B_CD,
 	B_PWD,
 	B_EXPORT,
-	B_ENV,
 	B_UNSET,
 	B_EXIT,
 };
@@ -210,7 +211,6 @@ typedef void	(*t_rbin)(t_msh *prog, t_ryancmd cmd, int cmd_num);
 ** Utility functions in utils.c
 */
 
-void			*ft_realloc(void *ptr, size_t newsize);
 char			*ft_str3join(const char *s1, const char *s2, const char *s3);
 void			print_tokens(t_ryantok *tokens);
 
@@ -262,6 +262,9 @@ void			std_exit(t_msh *prog);
 void			env_init(t_msh *prog);
 char			*env_val_get(const char *name, t_msh *prog, size_t len);
 void			print_env(t_msh *prog);
+void			env_unset(t_msh *prog, const char *unsetvar);
+void			env_export(t_msh *prog, char *newvar);
+char			**make_envp(t_msh *prog);
 
 /*
 ** New token functions - creates tokens using the same

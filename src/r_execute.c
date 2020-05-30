@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/28 13:45:00 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 23:37:53 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/30 13:49:42 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	ft_echo(t_msh *prog, t_ryancmd cmd, int cmd_num)
 	{
 		if (prog->tokens[i].type == STANDARD)
 		{
-			if (output == 1)
+			if (output == 1 && ft_strlen(prog->tokens[i].value) > 0)
 				ft_printf(" ");
 			if (output == 0)
 				if (ft_strcmp(prog->tokens[i].value, "-n") == 0)
@@ -50,7 +50,57 @@ void	ft_echo(t_msh *prog, t_ryancmd cmd, int cmd_num)
 		ft_printf("\n");
 }
 
-typedef void	(*t_rbin)(t_msh *prog, t_ryancmd cmd, int cmd_num);
+void	ft_unset(t_msh *prog, t_ryancmd cmd, int cmd_num)
+{
+	size_t		i;
+
+	i = 0;
+	(void)cmd;
+	while (prog->tokens[i].cmd_num != cmd_num)
+		i++;
+	while (prog->tokens[i].value && prog->tokens[i].cmd_num == cmd_num)
+	{
+		if (prog->tokens[i].type == STANDARD)
+			env_unset(prog, prog->tokens[i].value);
+		i++;
+	}
+}
+
+void	ft_export(t_msh *prog, t_ryancmd cmd, int cmd_num)
+{
+	size_t		i;
+
+	i = 0;
+	(void)cmd;
+	while (prog->tokens[i].cmd_num != cmd_num)
+		i++;
+	while (prog->tokens[i].value && prog->tokens[i].cmd_num == cmd_num)
+	{
+		if (prog->tokens[i].type == STANDARD)
+			env_export(prog, prog->tokens[i].value);
+		i++;
+	}
+}
+
+void	ft_env(t_msh *prog, t_ryancmd cmd, int cmd_num)
+{
+	size_t		i;
+
+	i = 0;
+	(void)cmd;
+	while (prog->tokens[i].cmd_num != cmd_num)
+		i++;
+	while (prog->tokens[i].cmd_num == cmd_num)
+	{
+		if (prog->tokens[i].type == STANDARD)
+		{
+			ft_printf_fd(2, "minishell: env: too many arguments\n");
+			return ;
+		}
+		i++;
+	}
+	print_env(prog);
+}
 
 t_rbin	builtin_funcs(int code)
 {
@@ -58,9 +108,9 @@ t_rbin	builtin_funcs(int code)
 	/* [B_CD] = "cd", */
 	[B_ECHO] = &ft_echo,
 	/* [B_PWD] = "pwd", */
-	/* [B_EXPORT] = "export", */
-	/* [B_UNSET] = "unset", */
-	/* [B_ENV] = "env", */
+	[B_EXPORT] = &ft_export,
+	[B_UNSET] = &ft_unset,
+	[B_ENV] = &ft_env,
 	/* [B_EXIT] = "exit", */
 	/* [7] = NULL, */
 	};
@@ -269,31 +319,10 @@ char		**make_argv(t_msh *prog, t_ryancmd cmd, char *executable)
 	return (argv);
 }
 
-char		**make_envp(t_msh *prog)
-{
-	size_t		i;
-	char		**envp;
-	size_t		total;
-
-	total = vector_total(&prog->env);
-	envp = (char **)malloc(sizeof(char *) * total + 1);
-	if (!envp)
-		return (NULL); // Mem fail - deal with later
-	i = 0;
-	while (i < total)
-	{
-		envp[i] = (char *)vector_get(&prog->env, i);
-		i++;
-	}
-	envp[i] = NULL;
-	return (envp);
-}
-
 void		external_exec(t_msh *prog, t_ryancmd cmd)
 {
 	char		*executable;
 	char		**argv;
-	char		**envp;
 
 	executable = find_binary(prog, cmd);
 	if (!executable)
@@ -302,35 +331,44 @@ void		external_exec(t_msh *prog, t_ryancmd cmd)
 		return ;
 	}
 	argv = make_argv(prog, cmd, executable);
-	envp = make_envp(prog);
-	execve(executable, argv, envp);
+	execve(executable, argv, prog->envp);
 	free(argv);
-	free(envp);
+}
+
+void		run_command(t_msh *prog, t_ryancmd cmd, int code)
+{
+	t_rbin	builtin;
+	
+	if (code != -1)
+	{
+		builtin = builtin_funcs(code);
+		builtin(prog, cmd, cmd.cmd_num);
+	}
+	else
+		external_exec(prog, cmd);
 }
 
 void		standard_command(t_msh *prog, t_ryancmd cmd)
 {
-	t_rbin	builtin;
 	int		code;
 	pid_t	child_pid;
 
 	code = ft_is_builtin(cmd.command);
-	child_pid = fork();
-	if (child_pid < 0)
-		exit (-1); // Piping error
-	else if (child_pid > 0)
-		wait(NULL);
-	else if (child_pid == 0)
+	if (code <= B_ENV)
 	{
-		if (code != -1)
+		child_pid = fork();
+		if (child_pid < 0)
+			exit (-1); // Piping error
+		else if (child_pid > 0)
+			wait(NULL);
+		else if (child_pid == 0)
 		{
-			builtin = builtin_funcs(code);
-			builtin(prog, cmd, cmd.cmd_num);
+			run_command(prog, cmd, code);
+			exit(0);
 		}
-		else
-			external_exec(prog, cmd);
-		exit(0);
 	}
+	else
+		run_command(prog, cmd, code);
 }
 
 void		fork_command(t_msh *prog, t_ryancmd cmd)

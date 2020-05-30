@@ -1,0 +1,10 @@
+- all the builtins: 
+	- cd
+	- pwd
+	- env
+	- exit
+
+- change input line to vecstr
+- Input doesn't scroll if the cursor is on the first line, and the third line
+has gone below the screen (or similar). Fix.
+- CTRL-L column position is still not correctly calibrated.

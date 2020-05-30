@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/06 21:08:08 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/27 22:47:06 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/30 11:47:57 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,8 +78,12 @@ static int		special_state(int c, t_ryanlexer lex)
 
 int				checkstate(int c, t_ryanlexer lex)
 {
-	/* if (lex.escape == 1) */
-	/* 	return (lex.state); */
+	if (lex.escape == 1)
+	{
+		if (ft_is_whitespace(c))
+			return (lex.state);
+		return (NORMAL);
+	}
 	if (lex.state == NORMAL || lex.state == WHITESPACE)
 		return (normal_state(c));
 	if (lex.state >= INDOUBLEQUOTE && lex.state <= INBACKTICK)

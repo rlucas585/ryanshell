@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/11/24 17:21:27 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 18:57:47 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/30 12:51:18 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,13 +46,11 @@ static char	*line_from_buf(char **line, char *buf, char **store)
 		*line = (char *)malloc(linelen + 1);
 		if (*line)
 			ft_strlcpy(*line, buf, linelen + 1);
+		return (*line);
 	}
-	else
-	{
-		*line = ft_realloc(*line, ft_strclen(*line, 0) + linelen + 1);
-		if (*line)
-			ft_strlcat(*line, buf, ft_strclen(*line, 0) + linelen + 1);
-	}
+	*line = ft_realloc(*line, ft_strlen(*line), ft_strlen(*line) + linelen + 1);
+	if (*line)
+		ft_strlcat(*line, buf, ft_strclen(*line, 0) + linelen + 1);
 	return (*line);
 }
 

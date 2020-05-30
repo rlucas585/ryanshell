@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/26 13:10:59 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 20:23:22 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/30 12:53:23 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,8 @@ void		insert_into_string(t_ryanlexer *lex, t_msh *prog, char *env_value)
 	end = ft_strlen(prog->line.cmd + lex->i) + lex->i;
 	if (end + env_value_len > prog->line.alloced_cmd)
 	{
-		prog->line.cmd = ft_realloc(prog->line.cmd, end + env_value_len + 1);
+		prog->line.cmd = ft_realloc(prog->line.cmd, prog->line.alloced_cmd,
+				end + env_value_len + 1);
 		prog->line.alloced_cmd = end + env_value_len;
 		/* ft_bzero(prog->line.cmd + end, prog->line.alloced_cmd - end + 1); */
 	}

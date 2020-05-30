@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/10/28 15:16:43 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 20:13:22 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/30 12:47:42 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ char				*ft_strtok(char *str, const char *delim);
 int					ft_strcmp(const char *s1, const char *s2);
 int					ft_putchar(int c);
 int					ft_is_whitespace(int c);
-void				*ft_realloc(void *ptr, size_t newsize);
+void				*ft_realloc(void *ptr, size_t oldsize, size_t newsize);
 
 /*
 ** Vector Functions

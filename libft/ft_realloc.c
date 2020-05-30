@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/29 18:41:57 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 18:42:12 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/30 12:47:20 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 ** contents from the previous memory, then frees the previous memory.
 */
 
-void	*ft_realloc(void *ptr, size_t newsize)
+void	*ft_realloc(void *ptr, size_t oldsize, size_t newsize)
 {
 	char	*new;
 
@@ -29,7 +29,7 @@ void	*ft_realloc(void *ptr, size_t newsize)
 	}
 	if (!ptr)
 		return (new);
-	ft_memcpy(new, ptr, newsize);
+	ft_memcpy(new, ptr, oldsize);
 	free(ptr);
 	return (new);
 }

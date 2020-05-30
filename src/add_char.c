@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/29 17:34:51 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/04/30 13:29:26 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/30 12:52:53 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,9 @@ static int	insert_char(t_line *line, char c)
 
 	if (line->cmd_len > line->alloced_cmd - 1)
 	{
+		line->cmd = ft_realloc(line->cmd, line->alloced_cmd, 
+				line->alloced_cmd + 100);
 		line->alloced_cmd += 100;
-		line->cmd = ft_realloc(line->cmd, line->alloced_cmd);
 		if (!line->cmd)
 			return (-1);
 	}
