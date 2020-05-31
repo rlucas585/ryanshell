@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/16 10:35:55 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 20:34:04 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/05/31 23:38:58 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,16 @@ int	msh_main(t_msh *prog)
 	{
 		if (read_input(prog) == -1)
 			error_exit(prog, MEM_FAIL);
+		prog->line.term.c_lflag |= ECHO;
+		prog->line.term.c_lflag |= ICANON;
+		tcsetattr(STDIN, TCSAFLUSH, &prog->line.term);
 		tokenizer(prog);
 		print_tokens(prog->tokens);
 		status = r_execute(prog);
 		refresh_prog(prog);
+		prog->line.term.c_lflag &= ~(ECHO | ICANON);
+		tcsetattr(STDIN, TCSAFLUSH, &prog->line.term);
+		tcflush(STDIN, TCIFLUSH);
 	}
 	std_exit(prog);
 	return (0);
@@ -49,6 +55,5 @@ int	main(void)
 	t_msh	prog;
 
 	env_init(&prog);
-	/* print_env(&prog); */
 	return (msh_main(&prog));
 }

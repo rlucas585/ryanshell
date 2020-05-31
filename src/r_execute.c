@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/28 13:45:00 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/30 13:49:42 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 00:14:14 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ void	ft_env(t_msh *prog, t_ryancmd cmd, int cmd_num)
 	(void)cmd;
 	while (prog->tokens[i].cmd_num != cmd_num)
 		i++;
-	while (prog->tokens[i].cmd_num == cmd_num)
+	while (prog->tokens[i].value && prog->tokens[i].cmd_num == cmd_num)
 	{
 		if (prog->tokens[i].type == STANDARD)
 		{
@@ -102,17 +102,115 @@ void	ft_env(t_msh *prog, t_ryancmd cmd, int cmd_num)
 	print_env(prog);
 }
 
+void	ft_pwd(t_msh *prog, t_ryancmd cmd, int cmd_num)
+{
+	(void)prog;
+	(void)cmd;
+	(void)cmd_num;
+	ft_printf("%s\n", getcwd(NULL, 0));
+}
+
+void	ft_cd(t_msh *prog, t_ryancmd cmd, int cmd_num)
+{
+	size_t		i;
+	char		*dest_dir;
+
+	(void)cmd;
+	i = 0;
+	dest_dir = NULL;
+	while (prog->tokens[i].cmd_num != cmd_num)
+		i++;
+	while (prog->tokens[i].value && prog->tokens[i].cmd_num == cmd_num)
+	{
+		if (prog->tokens[i].type == STANDARD)
+		{
+			if (dest_dir != NULL)
+			{
+				ft_printf_fd(2, "minishell: cd: too many arguments\n");
+				return ;
+			}
+			dest_dir = prog->tokens[i].value;
+		}
+		i++;
+	}
+	if (dest_dir == NULL || ft_strcmp("~", dest_dir) == 0)
+		dest_dir = env_val_get("HOME", prog, ft_strlen("HOME"));
+	if (dest_dir == NULL)
+		return ;
+	if (chdir(dest_dir) == -1)
+		ft_printf("cd: no such file or directory: %s\n", dest_dir);
+}
+
+int		get_exit_code(char *str)
+{
+	size_t		i;
+	int			ret;
+
+	i = 0;
+	while (str[i])
+	{
+		if (i == 0 && str[i] == '-')
+			;
+		else if (!ft_isdigit(str[i]))
+			return (-1);
+		i++;
+	}
+	ret = ft_atoi(str);
+	if (ret < 0)
+	{
+		ret = ft_abs(ret % 256);
+		ret = 256 - ret;
+		return (ret);
+	}
+	return (ft_atoi(str) % 256);
+}
+
+void	ft_exit(t_msh *prog, t_ryancmd cmd, int cmd_num)
+{
+	size_t		i;
+	int			exitstatus;
+	int			first;
+
+	(void)cmd;
+	i = 0;
+	exitstatus = 0;
+	first = 0;
+	while (prog->tokens[i].cmd_num != cmd_num)
+		i++;
+	while (prog->tokens[i].value && prog->tokens[i].cmd_num == cmd_num)
+	{
+		if (prog->tokens[i].type == STANDARD)
+		{
+			if (first == 1)
+			{
+				ft_printf_fd(2, "minishell: exit: too many arguments\n");
+				return ;
+			}
+			first = 1;
+			exitstatus = get_exit_code(prog->tokens[i].value);
+			if (exitstatus == -1)
+			{
+				ft_printf_fd(2, "minishell: exit: %s: "
+						"numeric argument required\n", prog->tokens[i].value);
+				exit(2); // Should of course be an exit that frees everything
+			}
+		}
+		i++;
+	}
+	exit(exitstatus); // Should of course be an exit that frees everything
+}
+
 t_rbin	builtin_funcs(int code)
 {
 	static const t_rbin	builtins[] = {
-	/* [B_CD] = "cd", */
+	[B_CD] = &ft_cd,
 	[B_ECHO] = &ft_echo,
-	/* [B_PWD] = "pwd", */
+	[B_PWD] = &ft_pwd,
 	[B_EXPORT] = &ft_export,
 	[B_UNSET] = &ft_unset,
 	[B_ENV] = &ft_env,
-	/* [B_EXIT] = "exit", */
-	/* [7] = NULL, */
+	[B_EXIT] = &ft_exit,
+	[7] = NULL,
 	};
 
 	return (builtins[code]);
@@ -331,6 +429,11 @@ void		external_exec(t_msh *prog, t_ryancmd cmd)
 		return ;
 	}
 	argv = make_argv(prog, cmd, executable);
+	/* prog->line.term.c_lflag |= (ECHO | ICANON); */
+	/* tcsetattr(STDIN, TCSAFLUSH, &prog->line.term); */
+		/* Error check here for term error. */
+	/* prog->line.term.c_lflag &= ~(ECHO | ICANON); */
+	/* tcsetattr(STDIN, TCSAFLUSH, &prog->line.term); */
 	execve(executable, argv, prog->envp);
 	free(argv);
 }
