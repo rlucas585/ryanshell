@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/28 13:45:00 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 15:08:45 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 15:19:45 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -362,11 +362,27 @@ char		**make_argv(t_msh *prog, t_ryancmd cmd, char *executable)
 	return (argv);
 }
 
+int			check_if_path(t_ryancmd cmd)
+{
+	struct stat	buffer;
+
+	if (stat(cmd.command, &buffer) == 0)
+		return (1);
+	return (0);
+}
+
 void		external_exec(t_msh *prog, t_ryancmd cmd)
 {
 	char		*executable;
 	char		**argv;
 
+	if (check_if_path(cmd))
+	{
+		argv = make_argv(prog, cmd, cmd.command);
+		execve(cmd.command, argv, prog->envp);
+		free(argv);
+		return ;
+	}
 	executable = find_binary(prog, cmd);
 	if (!executable)
 	{
@@ -374,13 +390,7 @@ void		external_exec(t_msh *prog, t_ryancmd cmd)
 		return ;
 	}
 	argv = make_argv(prog, cmd, executable);
-	/* prog->line.term.c_lflag |= (ECHO | ICANON); */
-	/* tcsetattr(STDIN, TCSAFLUSH, &prog->line.term); */
-		/* Error check here for term error. */
-	/* prog->line.term.c_lflag &= ~(ECHO | ICANON); */
-	/* tcsetattr(STDIN, TCSAFLUSH, &prog->line.term); */
 	execve(executable, argv, prog->envp);
-	ft_printf("an we out\n");
 	free(argv);
 }
 

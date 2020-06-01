@@ -4,8 +4,17 @@
 	- env
 	- exit
 
-- change input line to vecstr
 - Input doesn't scroll if the cursor is on the first line, and the third line
 has gone below the screen (or similar). Fix.
 - CTRL-L column position is still not correctly calibrated.
 - Add error checking for dup2 calls
+- Consider adding one to the value of SHLVL.
+- Get signals working (CTRL-C and CTRL-\)
+- Tidy up all code (especially in r_execute)
+- change input line to vecstr
+- Create vecstr type
+- Add exit functions, should free:
+	- all env values
+	- envp in prog
+	- The vector of env values
+	- The input string (if currently allocated)
