@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/28 13:45:00 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 00:14:14 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 15:08:45 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
 
 void	ft_echo(t_msh *prog, t_ryancmd cmd, int cmd_num)
 {
@@ -293,64 +296,6 @@ void	check_pipe(t_msh *prog, t_ryancmd *cmd, int cmd_num)
 	return ;
 }
 
-t_ryancmd	format_cmd(t_msh *prog, int cmd_num)
-{
-	t_ryancmd	cmd;
-	size_t		i;
-
-	i = 0;
-	cmd.output = NULL;
-	cmd.input = NULL;
-	cmd.command = NULL;
-	cmd.append = 0;
-	cmd.cmd_num = cmd_num;
-	cmd.fork = 0;
-	while (prog->tokens[i].value && prog->tokens[i].cmd_num != cmd_num)
-		i++;
-	while (prog->tokens[i].value && prog->tokens[i].cmd_num == cmd_num)
-	{
-		update_cmd(prog->tokens[i].value, prog->tokens[i].type, &cmd);
-		i++;
-	}
-	if (prog->tokens[i].value)
-		check_pipe(prog, &cmd, cmd_num);
-	return (cmd);
-}
-
-void		print_cmd(t_ryancmd cmd)
-{
-	ft_printf("Cmd_num = %d\n", cmd.cmd_num);
-	ft_printf("Command = %s\n", cmd.command);
-	if (cmd.output == (char *)1)
-		ft_printf("Output = Piped STDOUT\n");
-	else if (cmd.output == NULL)
-		ft_printf("Output = Standard STDOUT\n");
-	else
-		ft_printf("Output = file named %s\n", cmd.output);
-	if (cmd.input == NULL)
-		ft_printf("Input = STDIN\n");
-	else
-		ft_printf("Input = file named %s\n", cmd.input);
-	if (cmd.append)
-		ft_printf("Appending output = TRUE\n");
-	else
-		ft_printf("Appending output = FALSE\n");
-	if (cmd.fork)
-		ft_printf("Start new child process? TRUE\n\n");
-	else
-		ft_printf("Start new child process? FALSE\n\n");
-}
-
-int			r_runcmd(t_msh *prog, int cmd_num)
-{
-	t_ryancmd	cmd;
-
-	cmd = format_cmd(prog, cmd_num);
-	/* print_cmd(cmd); */
-	execute_cmd(prog, cmd);
-	return (cmd.fork);
-}
-
 char		*find_binary(t_msh *prog, t_ryancmd cmd)
 {
 	char		*path;
@@ -435,6 +380,7 @@ void		external_exec(t_msh *prog, t_ryancmd cmd)
 	/* prog->line.term.c_lflag &= ~(ECHO | ICANON); */
 	/* tcsetattr(STDIN, TCSAFLUSH, &prog->line.term); */
 	execve(executable, argv, prog->envp);
+	ft_printf("an we out\n");
 	free(argv);
 }
 
@@ -451,67 +397,158 @@ void		run_command(t_msh *prog, t_ryancmd cmd, int code)
 		external_exec(prog, cmd);
 }
 
-void		standard_command(t_msh *prog, t_ryancmd cmd)
+t_ryancmd	format_cmd(t_msh *prog, int cmd_num)
+{
+	t_ryancmd	cmd;
+	size_t		i;
+
+	i = 0;
+	cmd.output = NULL;
+	cmd.input = NULL;
+	cmd.command = NULL;
+	cmd.append = 0;
+	cmd.cmd_num = cmd_num;
+	cmd.fork = 0;
+	while (prog->tokens[i].value && prog->tokens[i].cmd_num != cmd_num)
+		i++;
+	while (prog->tokens[i].value && prog->tokens[i].cmd_num == cmd_num)
+	{
+		update_cmd(prog->tokens[i].value, prog->tokens[i].type, &cmd);
+		i++;
+	}
+	if (prog->tokens[i].value)
+		check_pipe(prog, &cmd, cmd_num);
+	return (cmd);
+}
+
+void		print_cmd(t_ryancmd cmd)
+{
+	ft_printf("Cmd_num = %d\n", cmd.cmd_num);
+	ft_printf("Command = %s\n", cmd.command);
+	if (cmd.output == (char *)1)
+		ft_printf("Output = Piped STDOUT\n");
+	else if (cmd.output == NULL)
+		ft_printf("Output = Standard STDOUT\n");
+	else
+		ft_printf("Output = file named %s\n", cmd.output);
+	if (cmd.input == NULL)
+		ft_printf("Input = STDIN\n");
+	else
+		ft_printf("Input = file named %s\n", cmd.input);
+	if (cmd.append)
+		ft_printf("Appending output = TRUE\n");
+	else
+		ft_printf("Appending output = FALSE\n");
+	if (cmd.fork)
+		ft_printf("Start new child process? TRUE\n\n");
+	else
+		ft_printf("Start new child process? FALSE\n\n");
+}
+
+void		io_files(t_msh *prog, t_ryancmd cmd)
+{
+	int		fd;
+
+	(void)prog; // Fix later.
+	if (cmd.input != NULL && cmd.input != (char *)1)
+	{
+		fd = open(cmd.input, O_RDONLY);
+		dup2(fd, STDIN); // Exit if fail
+	}
+	if (cmd.output != NULL && cmd.output != (char *)1)
+	{
+		if (cmd.append)
+			fd = open(cmd.output, O_CREAT | O_WRONLY | O_APPEND, 0644);
+		else
+			fd = open(cmd.output, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+		if (fd == -1)
+		{
+			ft_printf("minishell: %s: %s\n", cmd.output, strerror(errno));
+			exit (1);
+		}
+		dup2(fd, STDOUT); // free prog if error.
+	}
+}
+
+void		single_cmd(t_msh *prog, t_ryancmd cmd)
 {
 	int		code;
-	pid_t	child_pid;
+	pid_t	pid;
 
+	if (cmd.input != NULL || cmd.output != NULL)
+		io_files(prog, cmd);
 	code = ft_is_builtin(cmd.command);
-	if (code <= B_ENV)
+	if (code >= B_CD)
+		run_command(prog, cmd, code);
+	else
 	{
-		child_pid = fork();
-		if (child_pid < 0)
-			exit (-1); // Piping error
-		else if (child_pid > 0)
+		pid = fork();
+		if (pid < 0)
+			exit (-1); // Forking error
+		if (pid > 0)
 			wait(NULL);
-		else if (child_pid == 0)
+		if (pid == 0)
 		{
 			run_command(prog, cmd, code);
 			exit(0);
 		}
 	}
-	else
-		run_command(prog, cmd, code);
 }
 
-void		fork_command(t_msh *prog, t_ryancmd cmd)
+int			r_runcmd(t_msh *prog, int cmd_num)
 {
-	int		fd[2];
-	pid_t	child_pid;
-	int		saved_stdout;
+	t_ryancmd	cmd;
+	int			saved_stdout;
+	int			saved_stdin;
 
-	saved_stdout = dup(1);
+	saved_stdout = dup(STDOUT);
+	saved_stdin = dup(STDIN);
+	cmd = format_cmd(prog, cmd_num);
+	/* print_cmd(cmd); */
+	if (cmd.fork)
+		run_fork(prog, cmd);
+	else
+		single_cmd(prog, cmd);
+	dup2(saved_stdout, STDOUT);
+	dup2(saved_stdin, STDIN);
+	close(saved_stdout);
+	close(saved_stdin);
+	return (cmd.fork);
+}
+
+void		fork_and_pipe(t_msh *prog, int fd[2], pid_t *pid)
+{
+	(void)prog;
 	if (pipe(fd) == -1)
 		exit (-1); // Piping error
-	child_pid = fork();
-	if (child_pid < 0)
-		exit (-1); // Piping error
-	else if (child_pid > 0) // Parent process
-	{
-		close(fd[READ_END]);
-		dup2(fd[WRITE_END], STDOUT); // Redirect stdout to pipe.
-		standard_command(prog, cmd);
-		close(fd[WRITE_END]); // Close the stream to child process.
-		dup2(saved_stdout, 1);
-		close(saved_stdout);
-		wait(NULL); // Now parent waits for all child processes to complete.
-	}
-	else if (child_pid == 0) // Child process
-	{
-		close(fd[WRITE_END]); // Children don't write to parent in '|' pipes
-		dup2(fd[READ_END], STDIN); // Replace STDIN with input from pipe.
-		r_runcmd(prog, cmd.cmd_num + 1);
-		close(fd[READ_END]); // Reading should be complete.
-		exit(0); // Exit child process
-	}
+	*pid = fork();
+	if (*pid < 0)
+		exit (-1); // Forking error
 }
 
-void		execute_cmd(t_msh *prog, t_ryancmd cmd)
+void		run_fork(t_msh *prog, t_ryancmd cmd)
 {
-	if (cmd.fork)
-		fork_command(prog, cmd);
-	else
-		standard_command(prog, cmd);
+	int			fd[2];
+	pid_t		pid;
+
+	fork_and_pipe(prog, fd, &pid);
+	if (pid > 0)
+	{
+		close(fd[READ_END]);
+		dup2(fd[WRITE_END], STDOUT); // Add error checking
+		single_cmd(prog, cmd);
+		close(fd[WRITE_END]);
+		close(STDOUT);
+		wait(NULL);
+	}
+	if (pid == 0)
+	{
+		close(fd[WRITE_END]);
+		dup2(fd[READ_END], STDIN); // Add error checking
+		r_runcmd(prog, cmd.cmd_num + 1);
+		close(fd[READ_END]);
+		exit(0);
+	}
 }
 
 int		r_execute(t_msh *prog)

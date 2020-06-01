@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/16 10:51:49 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/30 13:15:43 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 13:57:35 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -281,9 +281,6 @@ void			mash_string(char *line, size_t dest, size_t src);
 */
 
 int				r_execute(t_msh *prog);
-void			execute_cmd(t_msh *prog, t_ryancmd cmd);
-void			fork_command(t_msh *prog, t_ryancmd cmd);
-void			standard_command(t_msh *prog, t_ryancmd cmd);
 void			print_cmd(t_ryancmd cmd);
 t_ryancmd		format_cmd(t_msh *prog, int cmd_num);
 void			check_pipe(t_msh *prog, t_ryancmd *cmd, int cmd_num);
@@ -292,6 +289,9 @@ int				ft_is_builtin(const char *command);
 t_rbin			builtin_funcs(int code);
 void			ft_echo(t_msh *prog, t_ryancmd cmd, int cmd_num);
 int				r_runcmd(t_msh *prog, int cmd_num);
+void			run_fork(t_msh *prog, t_ryancmd cmd);
+void			single_cmd(t_msh *prog, t_ryancmd cmd);
+void			run_command(t_msh *prog, t_ryancmd cmd, int code);
 
 /*
 ** Functions to read input and handle line-editing. In read_input.c,
