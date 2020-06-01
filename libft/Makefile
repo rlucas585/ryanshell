@@ -6,7 +6,7 @@
 #    By: rlucas <marvin@codam.nl>                     +#+                      #
 #                                                    +#+                       #
 #    Created: 2019/10/28 15:06:46 by rlucas        #+#    #+#                  #
-#    Updated: 2020/05/29 18:49:31 by rlucas        ########   odam.nl          #
+#    Updated: 2020/06/01 22:08:18 by rlucas        ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -71,7 +71,12 @@ SRCS = ft_isalpha.c ft_memset.c ft_bzero.c \
 	   $(VECTORDIR)vector_add_delete.c \
 	   $(VECTORDIR)vector_free.c \
 	   $(VECTORDIR)vector_set_get.c \
-	   $(VECTORDIR)vector_map.c
+	   $(VECTORDIR)vector_map.c \
+	   $(VECTORDIR)vecstr.c \
+	   $(VECTORDIR)vecstr_insert.c \
+	   $(VECTORDIR)vecstr_delete.c \
+	   $(VECTORDIR)vecstr_utils.c \
+	   $(VECTORDIR)vecstr_get_set.c
 
 
 OBJ = $(notdir $(SRCS:.c=.o))

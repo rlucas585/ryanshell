@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/16 10:51:49 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 13:57:35 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 23:26:07 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,8 +72,6 @@ enum			e_fsm
 	PIPE_PIPE,
 	ENV
 };
-
-extern char	**g_termbuff;
 
 typedef struct s_cmd	t_cmd;
 
@@ -147,7 +145,7 @@ typedef struct	s_line
 {
 	char			*prompt;
 	size_t			promptlen;
-	char			*cmd;
+	t_vecstr		cmd;
 	size_t			cmd_len;
 	size_t			alloced_cmd;
 	size_t			inputrow;
@@ -156,7 +154,7 @@ typedef struct	s_line
 	size_t			total_rows;
 	int				escmode;
 	char			*termtype;
-	char			*cap_table;
+	char			cap_table[2048];
 	struct termios	term;
 }				t_line;
 
@@ -175,6 +173,14 @@ enum			e_error
 	TERM_FAIL,
 	CAP_FAIL,
 	CMD_NOT_FOUND
+};
+
+enum			e_stages
+{
+	PRE_ENV,
+	IN_ENV,
+	IN_TERM,
+	IN_INPUT
 };
 
 enum			e_builtins
@@ -256,7 +262,7 @@ char			*error_lookup(int err);
 
 typedef void	(*t_escapef)(t_lexer *lex, char *last);
 
-void			error_exit(t_msh *prog, int err);
+void			error_exit(t_msh *prog, int err, int stage);
 void			std_exit(t_msh *prog);
 
 void			env_init(t_msh *prog);
@@ -265,15 +271,16 @@ void			print_env(t_msh *prog);
 void			env_unset(t_msh *prog, const char *unsetvar);
 void			env_export(t_msh *prog, char *newvar);
 char			**make_envp(t_msh *prog);
+void			clear_env(t_msh *prog);
 
 /*
 ** New token functions - creates tokens using the same
 ** allocated string from input.
 */
 
-void			tokenizer(t_msh *prog);
-size_t			sum_tokens(char *line);
-void			gen_tokens(t_ryantok **tokens, t_msh *prog);
+void			tokenizer(t_msh *prog, t_vecstr *line);
+size_t			sum_tokens(t_vecstr *line);
+void			gen_tokens(t_ryantok **tokens, t_vecstr *line, t_msh *prog);
 void			mash_string(char *line, size_t dest, size_t src);
 
 /*
@@ -319,7 +326,7 @@ int				checkstate(int c, t_ryanlexer lex);
 ** Lexing utilities.
 */
 
-int				check_esc_char(char *line, t_ryanlexer *lex, int gen_true);
+int				check_esc_char(t_vecstr *line, t_ryanlexer *lex, int gen_true);
 void			init_lexer(t_ryanlexer *lex);
 void			update_lexer(char *line, t_ryanlexer *lex);
 void			create_token(t_ryantok *token, t_ryanlexer *lex);

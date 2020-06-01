@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/29 18:47:19 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/30 12:52:05 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 20:33:24 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,16 +17,20 @@
 ** Return 1 on error. 0 on success.
 */
 
-static int	vector_resize(t_vector *v, size_t capacity)
+static int	vector_resize(t_vector *v, size_t new_capacity)
 {
 	void	**items;
 
-	items = ft_realloc(v->items, sizeof(void *) * v->capacity,
-			sizeof(void *) * capacity);
+	if (new_capacity > v->capacity)
+		items = ft_realloc(v->items, sizeof(void *) * v->capacity,
+				sizeof(void *) * new_capacity);
+	else
+		items = ft_realloc(v->items, sizeof(void *) * new_capacity,
+				sizeof(void *) * new_capacity);
 	if (!items)
 		return (1);
 	v->items = items;
-	v->capacity = capacity;
+	v->capacity = new_capacity;
 	return (0);
 }
 

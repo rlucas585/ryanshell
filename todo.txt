@@ -1,9 +1,3 @@
-- all the builtins: 
-	- cd
-	- pwd
-	- env
-	- exit
-
 - Input doesn't scroll if the cursor is on the first line, and the third line
 has gone below the screen (or similar). Fix.
 - CTRL-L column position is still not correctly calibrated.
@@ -16,5 +10,6 @@ has gone below the screen (or similar). Fix.
 - Add exit functions, should free:
 	- all env values
 	- envp in prog
-	- The vector of env values
 	- The input string (if currently allocated)
+- Add a function that will ask for input to continue if the input line ends
+while inside of a quote.

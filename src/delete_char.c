@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/29 17:37:30 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/04/30 14:25:17 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 21:46:18 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,6 @@
 ** delete_char() will reallocate a new length for the command string, and
 ** remove the last character from it.
 */
-
-static void	remove_char(t_line *line)
-{
-	size_t		index;
-
-	index = line->inputrow * line->max.col + line->cursor.col - line->promptlen;
-	ft_memmove(line->cmd + index, line->cmd + index + 1, line->alloced_cmd -
-			index - 1);
-}
 
 int			esc_delete(t_line *line)
 {
@@ -50,9 +41,9 @@ int			esc_delete(t_line *line)
 			index2++;
 			break ;
 		}
-		if (line->cmd[index - index2] != ' ' && charfound == 0)
+		if (vecstr_val(&line->cmd, index - index2) != ' ' && charfound == 0)
 			charfound = 1;
-		if (line->cmd[index - index2] == ' ' && charfound == 1)
+		if (vecstr_val(&line->cmd, index - index2) == ' ' && charfound == 1)
 			break ;
 		index2++;
 	}
@@ -70,17 +61,13 @@ int			delete_char(t_line *line)
 	size_t		row;
 	size_t		index;
 
-	// Check if our cursor is already at the very beginning.
 	if (line->inputrow == 0 && line->cursor.col == line->promptlen)
 		return (0);
-
-	// Decrease length of command.
-	line->cmd_len--;
-
-	// Assign total rows that command spans
-	line->total_rows = (line->cmd_len + line->promptlen) / line->max.col;
-
-	// Move cursor, to previous row if at start of row.
+	if (vecstr_slice(&line->cmd, vecstr_len(&line->cmd) - 1,
+				vecstr_len(&line->cmd)))
+		return (-1); // Mem fail - deal with later
+	line->total_rows = (vecstr_len(&line->cmd) + line->promptlen) /
+		line->max.col;
 	if (line->cursor.col == 0)
 	{
 		line->inputrow--;
@@ -89,16 +76,10 @@ int			delete_char(t_line *line)
 	}
 	else
 		line->cursor.col--;
-
-	// Internal component - remove character from stored array.
-	remove_char(line);
-
-	// Display component - Delete character from terminal display.
 	termcmd(MOVE_COLROW, line->cursor.col, line->cursor.row, 1);
 	termcmd(DELETE_START, 0, 0, 1);
 	termcmd(DELETE_CHAR, 0, 0, 1);
 	termcmd(DELETE_END, 0, 0, 1);
-
 	row = line->inputrow;
 	while (row < line->total_rows)
 	{
@@ -109,10 +90,10 @@ int			delete_char(t_line *line)
 		termcmd(MOVE_COLROW, line->max.col, line->cursor.row - line->inputrow +
 				row, 1);
 		index = row * line->max.col + line->max.col - line->promptlen - 1;
-		if (index > line->cmd_len)
+		if (index > vecstr_len(&line->cmd))
 			break ;
 		termcmd(INSERT_START, 0, 0, 1);
-		ft_printf("%c", line->cmd[index]);
+		ft_printf("%c", vecstr_val(&line->cmd, index));
 		termcmd(INSERT_END, 0, 0, 1);
 		row++;
 	}

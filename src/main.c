@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/16 10:35:55 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/31 23:38:58 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 23:39:53 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,10 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-char	**g_termbuff;
-
 void	refresh_prog(t_msh *prog)
 {
-	free(prog->line.cmd);
-	prog->line.cmd = NULL;
+	if (vecstr_truncate(&prog->line.cmd, 0))
+		exit (-1); // Mem fail - deal with later
 	free(prog->tokens);
 	prog->tokens = NULL;
 }
@@ -33,12 +31,11 @@ int	msh_main(t_msh *prog)
 	init_readline(prog);
 	while (status)
 	{
-		if (read_input(prog) == -1)
-			error_exit(prog, MEM_FAIL);
+		read_input(prog);
 		prog->line.term.c_lflag |= ECHO;
 		prog->line.term.c_lflag |= ICANON;
 		tcsetattr(STDIN, TCSAFLUSH, &prog->line.term);
-		tokenizer(prog);
+		tokenizer(prog, &prog->line.cmd);
 		print_tokens(prog->tokens);
 		status = r_execute(prog);
 		refresh_prog(prog);

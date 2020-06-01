@@ -6,12 +6,28 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/29 17:55:28 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/30 13:49:26 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 23:25:42 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <minishell.h>
 #include <libft.h>
+
+void		clear_env(t_msh *prog)
+{
+	size_t		i;
+	size_t		total;
+
+	i = 0;
+	total = vector_total(&prog->env);
+	while (i < total)
+	{
+		free(vector_get(&prog->env, i));
+		i++;
+	}
+	if (prog->envp)
+		free(prog->envp);
+}
 
 char		**make_envp(t_msh *prog)
 {
@@ -51,7 +67,8 @@ void		env_unset(t_msh *prog, const char *unsetvar)
 			if (valindex - 1 == len)
 			{
 				free(vector_get(&prog->env, i));
-				vector_delete(&prog->env, i);
+				if (vector_delete(&prog->env, i))
+					return ; // Mem fail - deal with later
 				free(prog->envp);
 				prog->envp = make_envp(prog);
 				if (!prog->envp)
@@ -119,23 +136,53 @@ char		*env_val_get(const char *name, t_msh *prog, size_t len)
 	return (NULL);
 }
 
+/* void	add_shell_level(t_msh *prog) */
+/* { */
+/* 	size_t		i; */
+/* 	char		*val; */
+/* 	size_t		total; */
+/*  */
+/* 	i = 0; */
+/* 	total = vector_total(&prog->env); */
+/* 	while (i < total) */
+/* 	{ */
+/* 		if (ft_strncmp("SHLVL", (char *)vector_get(&prog->env, i), 5) == 0) */
+/* 		{ */
+/* 			valindex = ft_strclen((char *)vector_get(&prog->env, i), '=') + 1; */
+/* 			if (valindex - 1 == len) */
+/* 			{ */
+/* 				val = (char *)vector_get(&prog->env, i) + valindex; */
+/* 				break ; */
+/* 			} */
+/* 		} */
+/* 		i++; */
+/* 	} */
+/* 	if (i == total) */
+/* 		return ; */
+/* 	vector_delete(&prog->env, i); */
+/* } */
+
 void	env_init(t_msh *prog)
 {
 	extern char	**environ;
 	size_t		i;
 	char		*newval;
 
+	prog->envp = NULL;
 	i = 0;
 	if (vector_init(&prog->env))
-		return ; // Mem error - deal with later
+		error_exit(prog, MEM_FAIL, PRE_ENV);
 	while (environ[i])
 	{
 		newval = ft_strdup(environ[i]);
 		if (!newval)
-			return ; // Mem error - deal with later
+			error_exit(prog, MEM_FAIL, IN_ENV);
 		if (vector_add(&prog->env, newval))
-			return ; // Mem error - deal with later
+			error_exit(prog, MEM_FAIL, IN_ENV);
 		i++;
 	}
+	/* add_shell_level(prog); */
 	prog->envp = make_envp(prog);
+	if (!prog->envp)
+		error_exit(prog, MEM_FAIL, IN_ENV);
 }

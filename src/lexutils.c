@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/06 21:18:20 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/27 22:57:59 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 22:33:47 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,12 +34,13 @@ void		update_lexer(char *line, t_ryanlexer *lex)
 		lex->j = lex->i;
 }
 
-int			check_esc_char(char *line, t_ryanlexer *lex, int gen_true)
+int			check_esc_char(t_vecstr *line, t_ryanlexer *lex, int gen_true)
 {
-	if (line[lex->i] == '\\' && lex->escape == 0 && lex->state != INSINGLEQUOTE)
+	if (vecstr_val(line, lex->i) == '\\' &&
+			lex->escape == 0 && lex->state != INSINGLEQUOTE)
 	{
 		if (gen_true)
-			mash_string(line, lex->i, lex->i + 1);
+			vecstr_slice(line, lex->i, lex->i + 1);
 		lex->escape = 1;
 		return (1);
 	}

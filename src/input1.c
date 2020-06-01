@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/29 17:59:38 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/31 22:53:34 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 21:36:16 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ typedef int		(*t_inputf)(t_line *line, char buf[6]);
 int		send_EOF(t_line *line, char buf[6])
 {
 	(void)buf;
-	if (line->cmd_len == 0)
+	if (vecstr_len(&line->cmd) == 0)
 	{
 		ft_printf("exit\n");
 		return (CTRL_D);
@@ -34,10 +34,10 @@ int		clear_screen(t_line *line, char buf[6])
 	(void)buf;
 	termcmd(CLEAR_SCREEN, 0, 0, 1);
 	termcmd(MOVE_COLROW, 0, 0, 1);
-	ft_printf("%s%s", line->prompt, line->cmd);
+	ft_printf("%s%s", line->prompt, vecstr_get(&line->cmd));
 	line->cursor.row = line->inputrow;
 	line->promptlen = ft_no_ansi_strlen(line->prompt);
-	line->cursor.col = (line->promptlen + line->cmd_len) %
+	line->cursor.col = (line->promptlen + vecstr_len(&line->cmd)) %
 		(line->max.col);
 	return (0);
 }
@@ -45,8 +45,8 @@ int		clear_screen(t_line *line, char buf[6])
 int		clear_input(t_line *line, char buf[6])
 {
 	(void)buf;
-	ft_bzero(line->cmd, line->alloced_cmd);
-	line->cmd_len = 0;
+	if (vecstr_truncate(&line->cmd, 0))
+		return (-1); // Mem error - make sure is dealt with.
 	line->cursor.row -= line->inputrow;
 	while (line->total_rows > 0)
 	{

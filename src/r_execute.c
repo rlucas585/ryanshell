@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/28 13:45:00 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 15:19:45 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 22:45:27 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,6 +200,7 @@ void	ft_exit(t_msh *prog, t_ryancmd cmd, int cmd_num)
 		}
 		i++;
 	}
+	ft_printf("exit\n");
 	exit(exitstatus); // Should of course be an exit that frees everything
 }
 
@@ -338,18 +339,18 @@ char		**make_argv(t_msh *prog, t_ryancmd cmd, char *executable)
 	while (prog->tokens[i].cmd_num != cmd.cmd_num)
 		i++;
 	cmd_start = i;
-	while (prog->tokens[i].cmd_num == cmd.cmd_num)
+	while (prog->tokens[i].value && prog->tokens[i].cmd_num == cmd.cmd_num)
 	{
 		if (prog->tokens[i].type == STANDARD)
 			argc++;
 		i++;
 	}
 	i = cmd_start;
-	argv = (char **)malloc(sizeof(char *) * argc + 1);
+	argv = (char **)malloc(sizeof(char *) * (argc + 1));
 	if (!argv)
 		return (NULL); // Mem fail - deal with later
 	argv[0] = executable;
-	while (prog->tokens[i].cmd_num == cmd.cmd_num)
+	while (prog->tokens[i].value && prog->tokens[i].cmd_num == cmd.cmd_num)
 	{
 		if (prog->tokens[i].type == STANDARD)
 		{

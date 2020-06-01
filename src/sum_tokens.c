@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/26 12:30:45 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/27 22:58:41 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 22:35:52 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,18 +33,18 @@ void			print_state(int c, t_ryanlexer lex)
 			c, lex.state, lex.escape, state_table[lex.state]);
 }
 
-size_t			sum_tokens(char *line)
+size_t			sum_tokens(t_vecstr *line)
 {
 	t_ryanlexer		lex;
 	size_t			sum;
 
 	init_lexer(&lex);
 	sum = 0;
-	while (line[lex.i])
+	while (vecstr_val(line, lex.i))
 	{
 		if (check_esc_char(line, &lex, 0))
 			continue ;
-		update_lexer(line, &lex);
+		update_lexer(vecstr_get(line), &lex);
 		/* print_state((*line)[lex.i], lex); #<{(| Troubleshooting |)}># */
 		if (lex.state >= SEMICOLON && lex.state <= PIPE_PIPE)
 			lex.state = WHITESPACE;

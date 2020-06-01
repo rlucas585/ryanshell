@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/16 10:50:53 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/31 22:55:00 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 23:39:31 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,9 +55,6 @@ static int	get_row(void)
 
 static int	initialize_line_editor(t_line *line)
 {
-	line->cmd = (char *)ft_calloc(1, 100);
-	if (!line->cmd)
-		return (-1);
 	line->cursor.row = get_row() - 1;
 	line->cursor.col = get_col(line->cursor.row + 1) - 1;
 	line->promptlen = line->cursor.col;
@@ -87,7 +84,7 @@ int		read_input(t_msh *prog)
 		read(STDIN, buf, 6);
 		send = handle_input(line, buf);
 		if (send < 0)
-			error_exit(prog, MEM_FAIL);
+			error_exit(prog, MEM_FAIL, IN_INPUT);
 		if (send == CTRL_D)
 			std_exit(prog);
 		refresh_cursor(line);

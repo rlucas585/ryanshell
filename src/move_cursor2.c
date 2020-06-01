@@ -6,10 +6,11 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/30 16:37:19 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/04/30 18:18:47 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 21:44:10 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <libft.h>
 #include <minishell.h>
 
 static size_t	find_index(t_line *line, size_t index, int dir)
@@ -24,9 +25,9 @@ static size_t	find_index(t_line *line, size_t index, int dir)
 	charfound = 0;
 	while (1)
 	{
-		if (line->cmd[index - index2] == ' ' && charfound == 1)
+		if (vecstr_val(&line->cmd, index - index2) == ' ' && charfound == 1)
 			break ;
-		if (charfound == 0 && line->cmd[index - index2] != ' ')
+		if (charfound == 0 && vecstr_val(&line->cmd, index - index2) != ' ')
 			charfound = 1;
 		if ((index - index2 == 0 && dir == LEFT) ||
 				(index - index2 == line->cmd_len && dir == RIGHT))

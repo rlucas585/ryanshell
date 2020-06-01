@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/10/28 15:16:43 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/30 12:47:42 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 22:08:49 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,5 +103,24 @@ int					vector_init(t_vector *v);
 void				vector_set(t_vector *v, int index, void *item);
 void				*vector_get(t_vector *v, int index);
 size_t				vector_total(t_vector *v);
+
+/*
+** Vector string functions
+*/
+
+int					vecstr_resize(t_vecstr *v, size_t new_capacity);
+int					vecstr_append_c(t_vecstr *v, int c);
+int					vecstr_append_str(t_vecstr *v, char *str2);
+int					vecstr_slice(t_vecstr *v, size_t start, size_t end);
+int					vecstr_init(t_vecstr *v);
+char				*vecstr_get(t_vecstr *v);
+void				vecstr_set(t_vecstr *v, size_t index, int c);
+int					vecstr_slice_by_needle(t_vecstr *v, const char *needle);
+int					vecstr_insert_str(t_vecstr *v,
+		size_t index, const char *str2);
+size_t				vecstr_len(t_vecstr *v);
+int					vecstr_truncate(t_vecstr *v, size_t truncpoint);
+int					vecstr_reset(t_vecstr *v);
+int					vecstr_val(t_vecstr *v, size_t i);
 
 #endif

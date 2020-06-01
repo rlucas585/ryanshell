@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/05 23:24:42 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/29 17:40:09 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 22:35:16 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,13 @@ void		assign_token_indexes(char *line, t_ryantok *tokens)
 	}
 }
 
-void		tokenizer(t_msh *prog)
+void		tokenizer(t_msh *prog, t_vecstr *line)
 {
 	size_t			totaltokens;
 
-	totaltokens = sum_tokens(prog->line.cmd);
+	totaltokens = sum_tokens(line);
 	ft_printf("sum = %u\n", totaltokens);
 	prog->tokens = (t_ryantok *)malloc(sizeof(t_ryantok) * (totaltokens + 1));
-	gen_tokens(&prog->tokens, prog);
-	assign_token_indexes(prog->line.cmd, prog->tokens);
+	gen_tokens(&prog->tokens, line, prog);
+	assign_token_indexes(vecstr_get(&prog->line.cmd), prog->tokens);
 }

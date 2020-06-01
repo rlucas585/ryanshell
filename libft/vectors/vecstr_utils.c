@@ -1,22 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   tables.c                                           :+:    :+:            */
+/*   vecstr_utils.c                                     :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2020/04/16 13:09:49 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 23:12:51 by rlucas        ########   odam.nl         */
+/*   Created: 2020/06/01 21:39:01 by rlucas        #+#    #+#                 */
+/*   Updated: 2020/06/01 21:41:57 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <minishell.h>
+#include <libft.h>
 
-char		*error_lookup(int err)
+int		vecstr_val(t_vecstr *v, size_t i)
 {
-	static char	*error_array[20] = {
-		[MEM_FAIL] = "Minishell was unable to allocate memory\n",
-		[CAP_FAIL] = "Terminal capabilities could not be determined\n"
-	};
-	return (error_array[err]);
+	if (i > v->len)
+		return (-1);
+	return (v->str[i]);
 }

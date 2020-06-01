@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/29 17:34:51 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/31 00:15:46 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 21:46:43 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,25 +21,6 @@
 ** add the newly input character to it.
 */
 
-static int	insert_char(t_line *line, char c)
-{
-	size_t	index;
-
-	if (line->cmd_len > line->alloced_cmd - 1)
-	{
-		line->cmd = ft_realloc(line->cmd, line->alloced_cmd, 
-				line->alloced_cmd + 100);
-		line->alloced_cmd += 100;
-		if (!line->cmd)
-			return (-1);
-	}
-	index = line->inputrow * line->max.col + line->cursor.col - line->promptlen;
-	ft_memmove(line->cmd + index + 1, line->cmd + index,
-			line->alloced_cmd - index - 1);
-	line->cmd[index] = c;
-	return (0);
-}
-
 int			add_char(t_line *line, char c)
 {
 	size_t		row;
@@ -47,45 +28,29 @@ int			add_char(t_line *line, char c)
 
 	if (c == '\n')
 		c = ' ';
-
-	// Increase length of command string
-	line->cmd_len++;
-
-	// Assign total rows that command spans
-	line->total_rows = (line->cmd_len + line->promptlen) / line->max.col;
-
-	// Internal component - change stored array values.
-	if (insert_char(line, c) == -1)
+	line->total_rows = (vecstr_len(&line->cmd) + line->promptlen)
+		/ line->max.col;
+	if (vecstr_append_c(&line->cmd, c))
 		return (-1);
-
-	// Display component - cursor should already be at relevant position. Enter
-	// insert mode and print new character to screen.
 	termcmd(INSERT_START, 0, 0, 1);
 	ft_printf("%c", c);
 	termcmd(INSERT_END, 0, 0, 1);
-
-	// Wrapping - If the current row is not the last line of input, then go
-	// to the start of every following row, and enter the LAST char of the
-	// previous row.
 	row = line->inputrow;
 	while (row < line->total_rows)
 	{
 		termcmd(MOVE_COLROW, 0, line->cursor.row - line->inputrow + row + 1, 1);
 		index = row * line->max.col + line->max.col - line->promptlen;
-		if (index > line->cmd_len)
+		if (index > vecstr_len(&line->cmd))
 			break ;
-		if (line->cmd[index] >= 32 && line->cmd[index] <= 126)
-		{
+		/* if (vecstr_get(&line->cmd)[index] >= 32 && vecstr_get(&line->cmd)[index] */
+		/* 		<= 126) */
+		/* { */
 			termcmd(INSERT_START, 0, 0, 1);
-			ft_printf("%c", line->cmd[index]);
+			ft_printf("%c", vecstr_val(&line->cmd, index));
 			termcmd(INSERT_END, 0, 0, 1);
-		}
+		/* } */
 		row++;
 	}
-
-	// Cursor management - move cursor to the right. If it goes to the next
-	// line, then change the value of inputrow, reset column, and move cursor
-	// to next row.
 	line->cursor.col++;
 	if (line->cursor.col >= line->max.col)
 	{
@@ -95,4 +60,3 @@ int			add_char(t_line *line, char c)
 	}
 	return (0);
 }
-

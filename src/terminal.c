@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/29 17:17:50 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/30 17:51:52 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 23:39:40 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,8 @@ static int	init_caps(t_line *line)
 	line->termtype = getenv("TERM");
 	if (!line->termtype)
 		return (-1);
-	line->cap_table = malloc(sizeof(char) * (2048));
-	if (!line->cap_table)
-		return (-1);
 	if (tgetent(line->cap_table, line->termtype) != 1)
 		return (-1);
-	g_termbuff = &line->cap_table;
 	return (0);
 }
 
@@ -58,8 +54,12 @@ void	init_readline(t_msh *prog)
 {
 	prog->line = (t_line){0};
 	if (init_term(&prog->line.term) || init_caps(&prog->line) == -1)
-		error_exit(prog, CAP_FAIL);
+		error_exit(prog, CAP_FAIL, IN_TERM);
 	prog->line.prompt = prompt(prog, &prog->line);
+	if (!prog->line.prompt)
+		error_exit(prog, MEM_FAIL, IN_TERM);
+	if (vecstr_init(&prog->line.cmd))
+		error_exit(prog, CAP_FAIL, IN_TERM);
 	prog->line.max.col = tgetnum("co");
 	prog->line.max.row = tgetnum("li");
 }

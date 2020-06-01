@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/26 13:10:59 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/30 12:53:23 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/01 22:34:08 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,60 +42,28 @@ static int	state_action(char *line, t_ryanlexer *lex)
 	return (0);
 }
 
-void		mash_string(char *line, size_t dest, size_t src)
-{
-	size_t		tail;
-
-	tail = ft_strlen(line + src) + src - (src - dest);
-	ft_memmove(line + dest, line + src, ft_strlen(line + src));
-	while (line[tail])
-	{
-		line[tail] = '\0';
-		tail++;
-	}
-}
-
-void		insert_into_string(t_ryanlexer *lex, t_msh *prog, char *env_value)
-{
-	size_t		end;
-	size_t		env_value_len;
-
-	env_value_len = ft_strlen(env_value);
-	end = ft_strlen(prog->line.cmd + lex->i) + lex->i;
-	if (end + env_value_len > prog->line.alloced_cmd)
-	{
-		prog->line.cmd = ft_realloc(prog->line.cmd, prog->line.alloced_cmd,
-				end + env_value_len + 1);
-		prog->line.alloced_cmd = end + env_value_len;
-		/* ft_bzero(prog->line.cmd + end, prog->line.alloced_cmd - end + 1); */
-	}
-	ft_memmove(prog->line.cmd + lex->i + env_value_len, prog->line.cmd + lex->i,
-			ft_strlen(prog->line.cmd + lex->i));
-	ft_memmove(prog->line.cmd + lex->i, env_value, ft_strlen(env_value));
-}
-
-void		add_env_value(t_ryanlexer *lex, t_msh *prog, size_t env_name_len)
+void		add_env_value(t_ryanlexer *lex, t_vecstr *line, size_t env_name_len,
+		t_msh *prog)
 {
 	char		*env_value;
 
-	env_value = env_val_get(prog->line.cmd + lex->i + 1,
+	env_value = env_val_get(vecstr_get(line) + lex->i + 1,
 			prog, env_name_len);
-	mash_string(prog->line.cmd, lex->i, lex->i + env_name_len + 1);
-	if (!env_value)
-	{
+	vecstr_slice(line, lex->i, lex->i + 1);
+	if (!env_value) {
 		if (lex->state != INDOUBLEQUOTE)
 		{
-			insert_into_string(lex, prog, " ");
-			lex->state = checkstate(prog->line.cmd[lex->i], *lex);
-			prog->line.cmd[lex->i] = '\0';
+			vecstr_insert_str(line, lex->i, " ");
+			lex->state = checkstate(vecstr_val(line, lex->i), *lex);
+			vecstr_set(line, lex->i, '\0');
 		}
 		return ;
 	}
 	else
-		insert_into_string(lex, prog, env_value);
+		vecstr_insert_str(line, lex->i, env_value);
 	lex->i = lex->i + ft_strlen(env_value) - 1;
 	if (lex->state != INDOUBLEQUOTE)
-		lex->state = checkstate(prog->line.cmd[lex->i], *lex);
+		lex->state = checkstate(vecstr_val(line, lex->i), *lex);
 }
 
 size_t		env_strclen(char *line, const char *chars)
@@ -119,80 +87,84 @@ size_t		env_strclen(char *line, const char *chars)
 	return (i);
 }
 
-void		expand_env_value(t_ryanlexer *lex, t_msh *prog)
+void		expand_env_value(t_ryanlexer *lex, t_vecstr *line, t_msh *prog)
 {
 	size_t		env_name_len;
+	char		*env_name;
 
-	env_name_len = env_strclen(prog->line.cmd + lex->i + 1, " \";<>.|\'");
+	env_name = vecstr_get(line) + lex->i + 1;
+	env_name_len = env_strclen(env_name, " \";<>.|\'");
 	if (lex->state == INDOUBLEQUOTE &&
-			ft_strclen(prog->line.cmd + lex->i + 1, '"') < env_name_len)
-		env_name_len = ft_strclen(prog->line.cmd + lex->i + 1, '"');
-	add_env_value(lex, prog, env_name_len);
+			ft_strclen(env_name, '"') < env_name_len)
+		env_name_len = ft_strclen(env_name, '"');
+	add_env_value(lex, line, env_name_len, prog);
 }
 
-void		evaluate_env(t_ryanlexer *lex, t_msh *prog)
+void		evaluate_env(t_ryanlexer *lex, t_vecstr *line, t_msh *prog)
 {
-	if (!prog->line.cmd[lex->i + 1])
+	int		c;
+
+	c = vecstr_val(line, lex->i);
+	if (c == 0)
 		return ;
-	if (prog->line.cmd[lex->i + 1] == '(')
-		(void)prog; /* Initiate subshell */
-	if (prog->line.cmd[lex->i + 1] == '$')
-		(void)prog; /* Get process id of shell */
-	if (ft_isalpha(prog->line.cmd[lex->i + 1]) || prog->line.cmd[lex->i + 1] ==
-			'_')
-		expand_env_value(lex, prog);
+	if (c == '(')
+		(void)line; /* Initiate subshell */
+	if (c == '$')
+		(void)line; /* Get process id of shell */
+	if (ft_isalpha(c) || c == '_')
+		expand_env_value(lex, line, prog);
 }
 
-void		quote_toks(t_ryantok **tokens, t_ryanlexer *lex,
+void		quote_toks(t_ryantok **tokens, t_ryanlexer *lex, t_vecstr *line,
 		t_msh *prog)
 {
-	mash_string(prog->line.cmd, lex->i, lex->i + 1);
+	vecstr_slice(line, lex->i, lex->i + 1);
 	if (lex->prevstate == WHITESPACE)
 		create_token((*tokens) + lex->tokeni, lex);
-	while (prog->line.cmd[lex->i])
+	while (vecstr_val(line, lex->i))
 	{
-		if (check_esc_char(prog->line.cmd, lex, 1))
+		if (check_esc_char(line, lex, 1))
 			continue ;
-		if (!lex->escape && prog->line.cmd[lex->i] == '$' &&
+		if (!lex->escape && vecstr_val(line, lex->i) == '$' &&
 				lex->state != INSINGLEQUOTE)
 		{
-			evaluate_env(lex, prog);
+			evaluate_env(lex, line, prog);
 			continue ;
 		}
-		update_lexer(prog->line.cmd, lex);
+		update_lexer(vecstr_get(line), lex);
 		if (lex->state == NORMAL)
 			break ;
 		lex->escape = 0;
 		lex->i++;
 	}
-	mash_string(prog->line.cmd, lex->i, lex->i + 1);
+	vecstr_slice(line, lex->i, lex->i + 1);
 	lex->i--;
 }
 
-void		gen_tokens(t_ryantok **tokens, t_msh *prog)
+void		gen_tokens(t_ryantok **tokens, t_vecstr *line, t_msh *prog)
 {
 	t_ryanlexer		lex;
 
 	init_lexer(&lex);
-	while (prog->line.cmd[lex.i])
+	while (vecstr_val(line, lex.i))
 	{
-		if (check_esc_char(prog->line.cmd, &lex, 1))
+		if (check_esc_char(line, &lex, 1))
 			continue ;
-		update_lexer(prog->line.cmd, &lex);
+		update_lexer(vecstr_get(line), &lex);
 		/* print_state(prog->line.cmd[lex.i], lex); #<{(| Troubleshooting |)}># */
 		if (!lex.escape && lex.state >= INDOUBLEQUOTE &&
 				lex.state <= INSINGLEQUOTE)
-			quote_toks(tokens, &lex, prog);
+			quote_toks(tokens, &lex, line, prog);
 		if (!lex.escape && lex.state >= SEMICOLON && lex.state <= PIPE_PIPE)
-			if(state_action(prog->line.cmd, &lex))
+			if(state_action(vecstr_get(line), &lex))
 				exit(1); /* Error in parsing */
 		if (lex.state != WHITESPACE && lex.prevstate == WHITESPACE)
 			create_token((*tokens) + lex.tokeni, &lex);
-		if (!lex.escape && prog->line.cmd[lex.i] == '$' &&
+		if (!lex.escape && vecstr_val(line, lex.i) == '$' &&
 				lex.state != INSINGLEQUOTE)
-			evaluate_env(&lex, prog);
+			evaluate_env(&lex, line, prog);
 		if (lex.state == WHITESPACE)
-			prog->line.cmd[lex.i] = '\0';
+			vecstr_set(line, lex.i, '\0');
 		lex.escape = 0;
 		lex.i++;
 	}
