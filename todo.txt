@@ -5,8 +5,6 @@ has gone below the screen (or similar). Fix.
 - Consider adding one to the value of SHLVL.
 - Get signals working (CTRL-C and CTRL-\)
 - Tidy up all code (especially in r_execute)
-- change input line to vecstr
-- Create vecstr type
 - Add exit functions, should free:
 	- all env values
 	- envp in prog

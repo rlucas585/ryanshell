@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/06/01 20:59:07 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 22:13:45 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/02 10:48:08 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ int		vecstr_append_c(t_vecstr *v, int c)
 			return (1);
 	v->str[v->len] = c;
 	v->len++;
+	v->str[v->len] = '\0';
 	return (0);
 }
 

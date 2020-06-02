@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/26 13:10:59 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 22:34:08 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/02 10:59:03 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void		add_env_value(t_ryanlexer *lex, t_vecstr *line, size_t env_name_len,
 
 	env_value = env_val_get(vecstr_get(line) + lex->i + 1,
 			prog, env_name_len);
-	vecstr_slice(line, lex->i, lex->i + 1);
+	vecstr_slice(line, lex->i, lex->i + env_name_len + 1);
 	if (!env_value) {
 		if (lex->state != INDOUBLEQUOTE)
 		{
@@ -104,7 +104,7 @@ void		evaluate_env(t_ryanlexer *lex, t_vecstr *line, t_msh *prog)
 {
 	int		c;
 
-	c = vecstr_val(line, lex->i);
+	c = vecstr_val(line, lex->i + 1);
 	if (c == 0)
 		return ;
 	if (c == '(')
@@ -146,6 +146,7 @@ void		gen_tokens(t_ryantok **tokens, t_vecstr *line, t_msh *prog)
 	t_ryanlexer		lex;
 
 	init_lexer(&lex);
+	ft_printf("line = %s\n", vecstr_get(line));
 	while (vecstr_val(line, lex.i))
 	{
 		if (check_esc_char(line, &lex, 1))

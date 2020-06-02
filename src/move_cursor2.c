@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/30 16:37:19 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 21:44:10 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/02 09:59:30 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ static size_t	find_index(t_line *line, size_t index, int dir)
 		if (charfound == 0 && vecstr_val(&line->cmd, index - index2) != ' ')
 			charfound = 1;
 		if ((index - index2 == 0 && dir == LEFT) ||
-				(index - index2 == line->cmd_len && dir == RIGHT))
+				(index - index2 == vecstr_len(&line->cmd) && dir == RIGHT))
 		{
 			if (dir == RIGHT)
 				return (index - index2);
@@ -64,7 +64,7 @@ static void	cursor_word_right(t_line *line)
 	index = line->inputrow * line->max.col + line->cursor.col - line->promptlen;
 	original_row = line->inputrow;
 	if (line->inputrow * line->max.col + line->cursor.col - line->promptlen >=
-			line->cmd_len)
+			vecstr_len(&line->cmd))
 		return ;
 	index = find_index(line, index, RIGHT);
 	line->cursor.col = (index + line->promptlen) % line->max.col;

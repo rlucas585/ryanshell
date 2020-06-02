@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/16 10:35:55 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 23:39:53 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/02 10:49:18 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 
 void	refresh_prog(t_msh *prog)
 {
-	if (vecstr_truncate(&prog->line.cmd, 0))
+	if (vecstr_reset(&prog->line.cmd))
 		exit (-1); // Mem fail - deal with later
 	free(prog->tokens);
 	prog->tokens = NULL;

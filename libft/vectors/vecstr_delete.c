@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/06/01 21:00:44 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 23:35:07 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/02 10:20:51 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,12 @@ int		vecstr_truncate(t_vecstr *v, size_t truncpoint)
 
 int		vecstr_reset(t_vecstr *v)
 {
-	free(v->str);
-	v->str = NULL;
+	v->capacity = 4;
+	v->len = 0;
+	v->str = ft_realloc(v->str, sizeof(char *) * v->capacity,
+			sizeof(char *) * v->capacity);
+	if (!v->str)
+		return (1);
+	ft_bzero(v->str, v->capacity);
 	return (0);
 }
