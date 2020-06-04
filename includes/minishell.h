@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/16 10:51:49 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 23:26:07 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/02 20:48:03 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,8 +260,6 @@ char			*error_lookup(int err);
 ** normally.
 */
 
-typedef void	(*t_escapef)(t_lexer *lex, char *last);
-
 void			error_exit(t_msh *prog, int err, int stage);
 void			std_exit(t_msh *prog);
 
@@ -281,7 +279,6 @@ void			clear_env(t_msh *prog);
 void			tokenizer(t_msh *prog, t_vecstr *line);
 size_t			sum_tokens(t_vecstr *line);
 void			gen_tokens(t_ryantok **tokens, t_vecstr *line, t_msh *prog);
-void			mash_string(char *line, size_t dest, size_t src);
 
 /*
 ** New execution based on new tokens.

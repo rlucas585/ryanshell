@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/28 13:45:00 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/02 10:52:56 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/02 13:02:06 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -456,28 +456,26 @@ void		print_cmd(t_ryancmd cmd)
 		ft_printf("Start new child process? FALSE\n\n");
 }
 
-void		io_files(t_msh *prog, t_ryancmd cmd)
+void		io_files(t_msh *prog, t_ryancmd cmd, int fd[2])
 {
-	int		fd;
-
 	(void)prog; // Fix later.
 	if (cmd.input != NULL && cmd.input != (char *)1)
 	{
-		fd = open(cmd.input, O_RDONLY);
-		dup2(fd, STDIN); // Exit if fail
+		fd[0] = open(cmd.input, O_RDONLY);
+		dup2(fd[0], STDIN); // Exit if fail
 	}
 	if (cmd.output != NULL && cmd.output != (char *)1)
 	{
 		if (cmd.append)
-			fd = open(cmd.output, O_CREAT | O_WRONLY | O_APPEND, 0644);
+			fd[1] = open(cmd.output, O_CREAT | O_WRONLY | O_APPEND, 0644);
 		else
-			fd = open(cmd.output, O_CREAT | O_WRONLY | O_TRUNC, 0644);
-		if (fd == -1)
+			fd[1] = open(cmd.output, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+		if (fd[1] == -1)
 		{
 			ft_printf("minishell: %s: %s\n", cmd.output, strerror(errno));
-			exit (1);
+			exit(1);
 		}
-		dup2(fd, STDOUT); // free prog if error.
+		dup2(fd[1], STDOUT); // free prog if error.
 	}
 }
 
@@ -485,9 +483,12 @@ void		single_cmd(t_msh *prog, t_ryancmd cmd)
 {
 	int		code;
 	pid_t	pid;
+	int		fd[2];
 
+	fd[0] = 0;
+	fd[1] = 0;
 	if (cmd.input != NULL || cmd.output != NULL)
-		io_files(prog, cmd);
+		io_files(prog, cmd, fd);
 	code = ft_is_builtin(cmd.command);
 	if (code >= B_CD)
 		run_command(prog, cmd, code);
@@ -501,9 +502,17 @@ void		single_cmd(t_msh *prog, t_ryancmd cmd)
 		if (pid == 0)
 		{
 			run_command(prog, cmd, code);
+			if (fd[0])
+				close(fd[0]);
+			if (fd[1])
+				close(fd[1]);
 			exit(0);
 		}
 	}
+	if (fd[0])
+		close(fd[0]);
+	if (fd[1])
+		close(fd[1]);
 }
 
 int			r_runcmd(t_msh *prog, int cmd_num)

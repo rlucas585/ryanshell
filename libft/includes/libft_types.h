@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/29 20:03:02 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 16:44:16 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/02 20:51:15 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,5 +41,13 @@ typedef struct		s_vecstr
 	size_t			capacity;
 	size_t			len;
 }					t_vecstr;
+
+typedef struct		s_vecarr
+{
+	void			*data;
+	size_t			elem_size;
+	size_t			capacity;
+	size_t			total;
+}					t_vecarr;
 
 #endif
