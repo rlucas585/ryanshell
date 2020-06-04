@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/10/28 15:16:43 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/02 11:03:21 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/04 17:09:34 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,5 +122,17 @@ size_t				vecstr_len(t_vecstr *v);
 int					vecstr_truncate(t_vecstr *v, size_t truncpoint);
 int					vecstr_reset(t_vecstr *v);
 int					vecstr_val(t_vecstr *v, size_t i);
+
+/*
+** Vector array functions
+*/
+
+int					vecarr_resize(t_vecarr *v, size_t new_capacity);
+int					vecarr_add(t_vecarr *v, void *new_elem);
+int					vecarr_delete(t_vecarr *v, size_t index);
+int					vecarr_init(t_vecarr *v, size_t elem_size);
+void				*vecarr_get(t_vecarr *v, size_t index);
+void				vecarr_reset(t_vecarr *v);
+int					vecarr_delete_by_val(t_vecarr *v, void *val);
 
 #endif

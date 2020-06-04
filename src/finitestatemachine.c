@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/06 21:08:08 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/05/30 11:47:57 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/04 12:03:20 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,8 @@ int				checkstate(int c, t_ryanlexer lex)
 	if (lex.escape == 1)
 	{
 		if (ft_is_whitespace(c))
+			return (lex.state);
+		if (lex.state == INDOUBLEQUOTE || lex.state == INSINGLEQUOTE)
 			return (lex.state);
 		return (NORMAL);
 	}

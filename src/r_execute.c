@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/28 13:45:00 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/02 13:02:06 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/04 17:10:04 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ void	ft_cd(t_msh *prog, t_ryancmd cmd, int cmd_num)
 	if (dest_dir == NULL)
 		return ;
 	if (chdir(dest_dir) == -1)
-		ft_printf("cd: no such file or directory: %s\n", dest_dir);
+		ft_printf("cd: %s: %s\n", strerror(errno), dest_dir);
 }
 
 int		get_exit_code(char *str)
@@ -388,7 +388,7 @@ void		external_exec(t_msh *prog, t_ryancmd cmd)
 	if (!executable)
 	{
 		ft_printf_fd(STDERR, "%s: command not found\n", cmd.command);
-		return ;
+		exit(errno);
 	}
 	argv = make_argv(prog, cmd, executable);
 	execve(executable, argv, prog->envp);
@@ -398,6 +398,7 @@ void		external_exec(t_msh *prog, t_ryancmd cmd)
 void		run_command(t_msh *prog, t_ryancmd cmd, int code)
 {
 	t_rbin	builtin;
+	pid_t	pid;
 	
 	if (code != -1)
 	{
@@ -405,7 +406,15 @@ void		run_command(t_msh *prog, t_ryancmd cmd, int code)
 		builtin(prog, cmd, cmd.cmd_num);
 	}
 	else
-		external_exec(prog, cmd);
+	{
+		pid = fork();
+		if (pid < 0)
+			return ; // Forking error
+		if (pid)
+			wait(NULL);
+		else
+			external_exec(prog, cmd);
+	}
 }
 
 t_ryancmd	format_cmd(t_msh *prog, int cmd_num)
@@ -456,12 +465,17 @@ void		print_cmd(t_ryancmd cmd)
 		ft_printf("Start new child process? FALSE\n\n");
 }
 
-void		io_files(t_msh *prog, t_ryancmd cmd, int fd[2])
+int			io_files(t_msh *prog, t_ryancmd cmd, int fd[2])
 {
 	(void)prog; // Fix later.
 	if (cmd.input != NULL && cmd.input != (char *)1)
 	{
 		fd[0] = open(cmd.input, O_RDONLY);
+		if (fd[0] == -1)
+		{
+			ft_printf("minishell: %s: %s\n", cmd.input, strerror(errno));
+			return (1);
+		}
 		dup2(fd[0], STDIN); // Exit if fail
 	}
 	if (cmd.output != NULL && cmd.output != (char *)1)
@@ -473,10 +487,11 @@ void		io_files(t_msh *prog, t_ryancmd cmd, int fd[2])
 		if (fd[1] == -1)
 		{
 			ft_printf("minishell: %s: %s\n", cmd.output, strerror(errno));
-			exit(1);
+			return (1);
 		}
 		dup2(fd[1], STDOUT); // free prog if error.
 	}
+	return (0);
 }
 
 void		single_cmd(t_msh *prog, t_ryancmd cmd)
@@ -488,10 +503,14 @@ void		single_cmd(t_msh *prog, t_ryancmd cmd)
 	fd[0] = 0;
 	fd[1] = 0;
 	if (cmd.input != NULL || cmd.output != NULL)
-		io_files(prog, cmd, fd);
+		if (io_files(prog, cmd, fd))
+			return ;
 	code = ft_is_builtin(cmd.command);
-	if (code >= B_CD)
+	/* if (code >= B_CD) */
+	if (cmd.fork == 0)
+	{
 		run_command(prog, cmd, code);
+	}
 	else
 	{
 		pid = fork();
@@ -550,16 +569,19 @@ void		run_fork(t_msh *prog, t_ryancmd cmd)
 {
 	int			fd[2];
 	pid_t		pid;
+	int			child_exit;
 
 	fork_and_pipe(prog, fd, &pid);
 	if (pid > 0)
 	{
+		vecarr_add(&g_pid, &pid);
 		close(fd[READ_END]);
 		dup2(fd[WRITE_END], STDOUT); // Add error checking
 		single_cmd(prog, cmd);
 		close(fd[WRITE_END]);
 		close(STDOUT);
-		wait(NULL);
+		waitpid(pid, &child_exit, 0);
+		vecarr_delete_by_val(&g_pid, &pid);
 	}
 	if (pid == 0)
 	{

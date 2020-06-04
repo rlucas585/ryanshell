@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/16 10:51:49 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/02 20:48:03 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/04 17:26:17 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,6 @@ typedef struct	s_line
 	char			*prompt;
 	size_t			promptlen;
 	t_vecstr		cmd;
-	size_t			cmd_len;
 	size_t			alloced_cmd;
 	size_t			inputrow;
 	t_coord			max;
@@ -209,6 +208,12 @@ enum			e_tokentypes
 	EOC,
 	DEFAULT,
 };
+
+/*
+** Globals
+*/
+
+t_vecarr		g_pid;
 
 typedef int		(*t_inputf)(t_line *line, char buf[6]);
 typedef void	(*t_rbin)(t_msh *prog, t_ryancmd cmd, int cmd_num);
@@ -328,6 +333,13 @@ void			init_lexer(t_ryanlexer *lex);
 void			update_lexer(char *line, t_ryanlexer *lex);
 void			create_token(t_ryantok *token, t_ryanlexer *lex);
 void			concatenate_input(char *line);
+
+
+/*
+** Signal functions.
+*/
+
+void			sighandler(int signal);
 
 /* Troubleshooting */
 void			print_state(int c, t_ryanlexer lex);

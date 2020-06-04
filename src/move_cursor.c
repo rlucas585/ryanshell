@@ -6,11 +6,12 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/29 17:38:37 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/04/30 16:30:08 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/04 16:46:16 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <minishell.h>
+#include <libft.h>
 
 void	cursor_move_row(t_line *line, int c)
 {
@@ -21,7 +22,7 @@ void	cursor_move_row(t_line *line, int c)
 		line->inputrow++;
 		line->cursor.row++;
 		if (line->inputrow * line->max.col + line->cursor.col - line->promptlen
-				> line->cmd_len)
+				> vecstr_len(&line->cmd))
 			cursor_end(line);
 		return ;
 	}
@@ -47,7 +48,8 @@ void	cursor_home(t_line *line)
 void	cursor_end(t_line *line)
 {
 	line->cursor.row = line->cursor.row - line->inputrow + line->total_rows;
-	line->cursor.col = (line->cmd_len + line->promptlen) % line->max.col;
+	line->cursor.col = (vecstr_len(&line->cmd) + line->promptlen)
+		% line->max.col;
 	line->inputrow = line->total_rows;
 }
 
@@ -71,8 +73,8 @@ void	cursor_left(t_line *line)
 
 void	cursor_right(t_line *line)
 {
-	if (line->inputrow * line->max.col + (line->cursor.col + 1) > line->cmd_len
-			+ line->promptlen)
+	if (line->inputrow * line->max.col + (line->cursor.col + 1) >
+			vecstr_len(&line->cmd) + line->promptlen)
 		return ;
 	line->cursor.col++;
 	if (line->cursor.col >= line->max.col)
