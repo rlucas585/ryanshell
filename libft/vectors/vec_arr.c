@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/06/02 20:49:58 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/04 17:09:20 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/05 11:23:46 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,12 +65,10 @@ int		vecarr_delete(t_vecarr *v, size_t index)
 int		vecarr_delete_by_val(t_vecarr *v, void *val)
 {
 	size_t		i;
-	size_t		vec_index;
 
 	i = 0;
 	while (i < v->total)
 	{
-		vec_index = i * v->elem_size;
 		if (ft_memcmp(vecarr_get(v, i), val, v->elem_size) == 0)
 			return (vecarr_delete(v, i));
 		i++;

@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2019/10/28 15:16:43 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/04 17:09:34 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/13 12:40:04 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,7 @@ int					vecstr_init(t_vecstr *v);
 char				*vecstr_get(t_vecstr *v);
 void				vecstr_set(t_vecstr *v, size_t index, int c);
 int					vecstr_slice_by_needle(t_vecstr *v, const char *needle);
+int					vecstr_insert_c(t_vecstr *v, size_t index, int c);
 int					vecstr_insert_str(t_vecstr *v,
 		size_t index, const char *str2);
 size_t				vecstr_len(t_vecstr *v);

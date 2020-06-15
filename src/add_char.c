@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/04/29 17:34:51 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/02 10:47:23 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/13 14:25:12 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,25 @@
 ** add the newly input character to it.
 */
 
+static void	scroll_lines(t_line *line)
+{
+	int			tmp;
+	int			tmp2;
+
+	if (line->total_rows - line->inputrow + line->cursor.row >= line->max.row)
+	{
+		tmp = line->cursor.row - 1;
+		tmp2 = line->cursor.col;
+		line->cursor.row = line->max.row - 1;
+		line->cursor.col = 0;
+		termcmd(MOVE_COLROW, line->cursor.col, line->cursor.row, 1);
+		termcmd(SCROLL_LINE, 0, 0, 1);
+		line->cursor.row = tmp;
+		line->cursor.col = tmp2;
+		termcmd(MOVE_COLROW, line->cursor.col, line->cursor.row, 1);
+	}
+}
+
 int			add_char(t_line *line, char c)
 {
 	size_t		row;
@@ -30,7 +49,9 @@ int			add_char(t_line *line, char c)
 		c = ' ';
 	line->total_rows = (vecstr_len(&line->cmd) + line->promptlen)
 		/ line->max.col;
-	if (vecstr_append_c(&line->cmd, c))
+	scroll_lines(line);
+	if (vecstr_insert_c(&line->cmd, line->inputrow * line->max.col
+				+ line->cursor.col - line->promptlen, c))
 		return (-1);
 	termcmd(INSERT_START, 0, 0, 1);
 	ft_printf("%c", c);

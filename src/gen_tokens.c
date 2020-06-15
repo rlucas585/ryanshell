@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/26 13:10:59 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/04 18:07:13 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/05 11:24:29 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,8 +131,8 @@ void		quote_toks(t_ryantok **tokens, t_ryanlexer *lex, t_vecstr *line,
 			evaluate_env(lex, line, prog);
 			continue ;
 		}
-		if (lex->escape && vecstr_val(line, lex->i) == 'n')
-			vecstr_set(line, lex->i, '\n');
+		/* if (lex->escape && vecstr_val(line, lex->i) == 'n') */
+		/* 	vecstr_set(line, lex->i, '\n'); */
 		update_lexer(vecstr_get(line), lex);
 		if (lex->state == NORMAL)
 			break ;

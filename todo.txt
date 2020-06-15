@@ -1,8 +1,4 @@
-- Input doesn't scroll if the cursor is on the first line, and the third line
-has gone below the screen (or similar). Fix.
-- CTRL-L column position is still not correctly calibrated.
 - Add error checking for dup2 calls
-- Consider adding one to the value of SHLVL.
 - Get signals working (CTRL-C and CTRL-\)
 - Tidy up all code (especially in r_execute)
 - Add exit functions, should free:
@@ -11,3 +7,10 @@ has gone below the screen (or similar). Fix.
 	- The input string (if currently allocated)
 - Add a function that will ask for input to continue if the input line ends
 while inside of a quote.
+- Fix the seg fault that occurs if a command has no command (e.g.
+`< input_file | more`).
+- CTRL-C functions perfectly - except for when the first text entered after
+CTRL-C is copy pasted. Fix this.
+- Another copy-paste issue: very often, the arrow keys will not have their usual
+functionality after copy-pasting, they output strange characters to the screen
+instead. Obviously needs fixing.

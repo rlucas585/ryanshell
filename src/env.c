@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/05/29 17:55:28 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/01 23:25:42 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/13 16:33:43 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,10 @@ void		env_export(t_msh *prog, char *newvar)
 	env_unset(prog, newvar);
 	if (vector_add(&prog->env, new))
 		return ; // Mem fail -deal with later
+	free(prog->envp);
+	prog->envp = make_envp(prog);
+	if (!prog->envp)
+		return ; // Mem fail - deal with later
 }
 
 void		print_env(t_msh *prog)
@@ -136,31 +140,44 @@ char		*env_val_get(const char *name, t_msh *prog, size_t len)
 	return (NULL);
 }
 
-/* void	add_shell_level(t_msh *prog) */
-/* { */
-/* 	size_t		i; */
-/* 	char		*val; */
-/* 	size_t		total; */
-/*  */
-/* 	i = 0; */
-/* 	total = vector_total(&prog->env); */
-/* 	while (i < total) */
-/* 	{ */
-/* 		if (ft_strncmp("SHLVL", (char *)vector_get(&prog->env, i), 5) == 0) */
-/* 		{ */
-/* 			valindex = ft_strclen((char *)vector_get(&prog->env, i), '=') + 1; */
-/* 			if (valindex - 1 == len) */
-/* 			{ */
-/* 				val = (char *)vector_get(&prog->env, i) + valindex; */
-/* 				break ; */
-/* 			} */
-/* 		} */
-/* 		i++; */
-/* 	} */
-/* 	if (i == total) */
-/* 		return ; */
-/* 	vector_delete(&prog->env, i); */
-/* } */
+char	*ft_super_strjoin(char *str1, char *str2, int free1, int free2)
+{
+	char	*new;
+
+	new = ft_strjoin(str1, str2);
+	if (free1)
+		free(str1);
+	if (free2)
+		free(str2);
+	return (new);
+}
+
+void	add_shell_level(t_msh *prog)
+{
+	size_t		i;
+	size_t		valindex;
+	int			lvl;
+	char		*new;
+
+	i = 0;
+	while (i < vector_total(&prog->env))
+	{
+		if (ft_strncmp("SHLVL", (char *)vector_get(&prog->env, i), 5) == 0)
+		{
+			valindex = ft_strclen((char *)vector_get(&prog->env, i), '=') + 1;
+			if (valindex - 1 == 5)
+			{
+				lvl = ft_atoi((char *)vector_get(&prog->env, i) + valindex);
+				new = ft_super_strjoin("SHLVL=", ft_itoa(lvl + 1), 0, 1);
+				if (!new)
+					error_exit(prog, MEM_FAIL, IN_ENV);
+				env_export(prog, new);
+				return ;
+			}
+		}
+		i++;
+	}
+}
 
 void	env_init(t_msh *prog)
 {
@@ -181,8 +198,8 @@ void	env_init(t_msh *prog)
 			error_exit(prog, MEM_FAIL, IN_ENV);
 		i++;
 	}
-	/* add_shell_level(prog); */
 	prog->envp = make_envp(prog);
 	if (!prog->envp)
 		error_exit(prog, MEM_FAIL, IN_ENV);
+	add_shell_level(prog);
 }

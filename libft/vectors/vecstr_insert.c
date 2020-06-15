@@ -6,7 +6,7 @@
 /*   By: rlucas <marvin@codam.nl>                     +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/06/01 20:59:07 by rlucas        #+#    #+#                 */
-/*   Updated: 2020/06/02 10:48:08 by rlucas        ########   odam.nl         */
+/*   Updated: 2020/06/13 12:44:09 by rlucas        ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,21 @@ int		vecstr_append_c(t_vecstr *v, int c)
 		if (vecstr_resize(v, v->capacity * 2))
 			return (1);
 	v->str[v->len] = c;
+	v->len++;
+	v->str[v->len] = '\0';
+	return (0);
+}
+
+int		vecstr_insert_c(t_vecstr *v, size_t index, int c)
+{
+	if (v->capacity - 1 == v->len)
+		if (vecstr_resize(v, v->capacity * 2))
+			return (1);
+	if (index > v->len)
+		return (0);
+	ft_memmove(v->str + index + 1, v->str + index,
+			v->len - index);
+	v->str[index] = c;
 	v->len++;
 	v->str[v->len] = '\0';
 	return (0);
